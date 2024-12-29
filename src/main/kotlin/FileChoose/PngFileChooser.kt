@@ -1,3 +1,5 @@
+package FileChoose
+
 import javax.swing.JFileChooser
 
 class PngFileChooser: JFileChooser() {

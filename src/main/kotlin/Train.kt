@@ -9,12 +9,12 @@ class Train {
 
     fun info(tab: String = "\t"): String {
         val dateTimeFormat = SimpleDateFormat("HH:mm:ss")
-        return "${dateTimeFormat.format(time)}$tab${route}$tab${platform}$tab${if (isGoingToDepo) 1 else 0}"
+        return "${dateTimeFormat.format(time)}$tab${platform}$tab${route}$tab${if (isGoingToDepo) 1 else 0}"
     }
 
     override fun toString(): String {
         val tab = " "
         val dateTimeFormat = SimpleDateFormat("HH:mm:ss")
-        return "${dateTimeFormat.format(time)}$tab${route}$tab${platform}$tab${if (isGoingToDepo) 1 else 0}"
+        return "${dateTimeFormat.format(time)}$tab${platform}$tab${route}$tab${if (isGoingToDepo) 1 else 0}"
     }
 }
