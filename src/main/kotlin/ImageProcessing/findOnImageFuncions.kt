@@ -146,10 +146,13 @@ fun findUpCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: Mut
         for (v in lv) {
             if (dist(h[1], v[1]) < 4
                 && ((abs(h[1].x - h[0].x) > (boxSize/3) || abs(v[1].y - v[0].y) > (boxSize/3))
-                        && abs(h[1].x - h[0].x) < (boxSize/10*9) && abs(h[1].x - h[0].x) > (boxSize/4)
+                        && abs(h[1].x - h[0].x) < (boxSize/10*9)
+                        && abs(h[1].x - h[0].x) > (boxSize/4)
+//                        && abs(v[1].y - v[0].y) > 3
                         && abs(v[1].y - v[0].y) < (boxSize/10*9))) {
-                if (!corners.contains(h[1]))
+                if (!corners.contains(h[1])) {
                     corners.add(h[1])
+                }
                 return
             }
         }
@@ -231,10 +234,8 @@ fun findDownCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: M
     }
     for (h in lh) {
         for (v in lv) {
-            if (dist(h[1], v[1]) < 8
-                && (abs(h[1].x - h[0].x) > (boxSize/2) && abs(v[1].y - v[0].y) > (boxSize/4))
-                        && (abs(h[1].x - h[0].x) < (boxSize/10*9)
-                        && abs(v[1].y - v[0].y) < (boxSize/10*9))) {
+            if (abs(h[1].x - h[0].x) > (boxSize/2) && abs(v[1].y - v[0].y) > (boxSize/4)
+                        && abs(h[1].x - h[0].x) < (boxSize/10*9)) {
                 if (!corners.contains(h[1]))
                     corners.add(h[1])
                 return

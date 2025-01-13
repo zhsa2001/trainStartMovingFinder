@@ -34,7 +34,7 @@ dependencies {
 //    implementation("com.google.code.gson:gson:2.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0-RC")
     implementation("net.sourceforge.tess4j:tess4j:5.13.0")
-    implementation("org.openpnp:opencv:4.9.0-0")
+//    implementation("org.openpnp:opencv:4.9.0-0")
 
 
 }

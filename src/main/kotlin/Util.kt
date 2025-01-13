@@ -1,5 +1,4 @@
 
-import FileChoose.PngFileChooser
 import ImageProcessing.*
 import OCR.ASP
 import OCR.SpaceOCR.SpaceOCR
@@ -10,6 +9,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import train.SecondLineRoutesCollection
+import train.Train
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Image
@@ -19,25 +20,19 @@ import java.io.File
 import java.nio.file.Files
 import java.util.*
 import javax.imageio.ImageIO
-import javax.swing.JFileChooser
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
 
 val errorMessageStart = "Ошибка обработки файла"
 
-fun getFileFromChooseDialog(): File?{
-    val fc = PngFileChooser()
-    return if(fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-        fc.selectedFile else null
-}
 
-fun formListTrainsInSecondLine(trains: List<Train>){
+
+fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<Int> = mutableListOf<Int>()): SecondLineRoutesCollection {
     val trainSet = HashMap<Int,Int>()
     var currentIndex = 0
-    var secondLineStart = HashMap<Int,Train>()
-    var secondLineEnd = HashMap<Int,Train>()
-    var secondLine = mutableListOf<Pair<Int,Pair<Date,Date>>>()
+    var secondLineStart = HashMap<Int, Train>()
+    var secondLineEnd = HashMap<Int, Train>()
+    var secondLine = SecondLineRoutesCollection()
     for (i in trains.indices){
         if (trainSet.containsKey(trains[i].route)){
             if (trainSet[trains[i].route]!! > currentIndex){
@@ -46,14 +41,15 @@ fun formListTrainsInSecondLine(trains: List<Train>){
                     secondLineStart[trains[i].route] = trains[trainSet[trains[i].route]!!]
                 }
                 secondLineEnd[trains[i].route] = trains[i]
+                listOfRoutes.add(trains[i].route)
             } else {
                 // to do
                 if (secondLineStart.containsKey(trains[i].route)){
 
-                    secondLine.add(Pair(trains[i].route,
-                        Pair(
-                        secondLineStart.remove(trains[i].route)!!.time,
-                            secondLineEnd.remove(trains[i].route)!!.time)))
+                    secondLine.addDiapasone(
+                        trains[i].route,
+                        Pair(secondLineStart.remove(trains[i].route)!!.time,
+                            secondLineEnd.remove(trains[i].route)!!.time))
                 }
                 // check if trains was on second line
                 // make line
@@ -62,9 +58,20 @@ fun formListTrainsInSecondLine(trains: List<Train>){
         }
         trainSet[trains[i].route] = i
     }
+    var routesRemains = secondLineStart.values.toMutableList()
+    for(i in 0..<routesRemains.size){
+        secondLine.addDiapasone(
+            routesRemains[i].route,
+            Pair(
+                secondLineStart.remove(routesRemains[i].route)!!.time,
+                secondLineEnd.remove(routesRemains[i].route)!!.time
+            )
+        )
+    }
 
-    println("${secondLineStart}\n${secondLineEnd}")
+    println("secondLineStart${secondLineStart}\nsecondLineEnd${secondLineEnd}")
     println(secondLine)
+    return secondLine
 }
 
 fun clearFolder(folderSubimages: String) {
@@ -79,49 +86,6 @@ fun clearFolder(folderSubimages: String) {
         }
     }
 }
-
-suspend fun findBottomTrain(image: BufferedImage){
-    val grayImage = BinaryColorSchemeConverter(threshold = 200).convert(
-        GrayColorSchemeConverter().convert(image)
-    )
-    var bottomGraphicsLine1 = getHorisontalLines(
-        grayImage)[21].y
-    var bottomGraphicsLine2 = getHorisontalLines(
-        grayImage)[22].y
-    var boxMiniSize = 30
-    var widthBoxMax = 60
-    var heightBoxMax = 80
-    var i = 0
-
-    while(i < grayImage.width-boxMiniSize){
-        val line = findVerticalLine(grayImage,i,bottomGraphicsLine2 - boxMiniSize, boxMiniSize)
-        if(line.size == 2 &&
-            abs(line[0].y-line[1].y)>boxMiniSize - 2){
-
-            val x = max(line[0].x - widthBoxMax,0)
-            val w = min((line[0].x + widthBoxMax),grayImage.width) - x
-            val name = "box\\box_${i}.png"
-            val sub = image.getSubimage(x,
-                bottomGraphicsLine2 - heightBoxMax,
-                w,
-                heightBoxMax
-            )
-//            removeGreen(sub)
-            ImageIO.write(sub,
-                "PNG",
-                File(name)
-                )
-            workWithOpenCV(name,name)
-            println(tess( File(name),4))
-            i = line[0].x + boxMiniSize
-            readln()
-            continue
-//            break
-        }
-        i++
-    }
-}
-
 
 fun checkIsNum(num: String):Boolean{
     var res = true
@@ -477,11 +441,10 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
                   hours: Int,
                   minutes: Int,
                   platform1y: Int,
-                  coroutineScope: CoroutineScope,
-                  scrollState: ScrollState,
+                  coroutineScope: CoroutineScope?,
+                  scrollState: ScrollState?,
                   recognisedRoutes: MutableList<String>
                   ): Int {
-
     val stringRoutes = newTextFieldVal.text.split("\n")
     val currentCorner = min(stringRoutes.size-1,corners.size-1);
     if (currentCorner >= trains.size){
@@ -493,9 +456,9 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
         // train.route = if (recognisedRoutes.size > currentCorner && recognisedRoutes[currentCorner] != "") recognisedRoutes[currentCorner].toInt() else 0
         if(newTextFieldVal.text.startsWith(oldTextFieldVal.text)){
             train.route = if (recognisedRoutes.size > currentCorner && recognisedRoutes[currentCorner] != "") recognisedRoutes[currentCorner].toInt() else 0
-            coroutineScope.launch {
-                scrollState.animateScrollTo(scrollState.maxValue + 100)
-            }
+//            coroutineScope.launch {
+//                scrollState.animateScrollTo(scrollState.maxValue + 100)
+//            }
         }
     }
     for(i in trains.indices){
@@ -505,4 +468,19 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
         }
     }
     return currentCorner
+}
+
+fun getTrainsFromFile(file: File, tab: String = "\t"): MutableList<Train> {
+    var trainLines = Files.readAllLines(file.toPath())
+    var trains = mutableListOf<Train>()
+    for(line in trainLines){
+        val data = line.split(tab)
+        val train = Train()
+        train.time = train.dateTimeFormat.parse(data[0])
+        train.platform = data[1].toInt()
+        train.route = data[2].toInt()
+        train.isGoingToDepo = data[3].toInt() == 1
+        trains.add(train)
+    }
+    return trains
 }

@@ -1,0 +1,58 @@
+package ui.screens
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.unit.dp
+import checkIsNum
+import ui.MyTimePicker
+import ui.SelectFileButton
+import ui.utils.getImageSource
+import java.io.File
+import java.util.*
+import kotlin.math.min
+
+@Composable
+fun MainSettingsScreen(onFileSelected:(File?)->Unit,
+                       onTimeStartSet:(Calendar)->Unit,
+                       onTimeDiapasoneInMinutesSet:(Int)->Unit,
+                       goNext:() -> Unit){
+
+    var timeStart by remember { mutableStateOf(Calendar.Builder().build()) }
+    var timeEnd by remember { mutableStateOf(Calendar.Builder().build()) }
+    var file by remember { mutableStateOf<File?>(null) }
+    var nextDay by remember { mutableStateOf(true) }
+
+    Column{
+        SelectFileButton("Выбрать изображение",{ file = it; onFileSelected(file) },{ getImageSource() })
+
+        Text("Время начала")
+        MyTimePicker(5,30, { timeStart = it })
+
+        Text("Время конца")
+        MyTimePicker(5,30, { timeEnd = it })
+        Row {
+            Checkbox(checked = nextDay, onCheckedChange = {nextDay = it})
+            Text("Захватывается начало следующего дня", modifier = Modifier.align(Alignment.CenterVertically))
+        }
+
+        file?.let{
+            Button(onClick =
+            {
+                onTimeStartSet(timeStart)
+                val minutesRange = timeEnd[Calendar.HOUR_OF_DAY]*60+timeEnd[Calendar.MINUTE] - (timeStart[Calendar.HOUR_OF_DAY]*60+timeStart[Calendar.MINUTE]) + if (nextDay) 24*60 else 0
+                onTimeDiapasoneInMinutesSet(minutesRange)
+                goNext() }){
+                Text("Продолжить")
+            }
+        }
+    }
+}
