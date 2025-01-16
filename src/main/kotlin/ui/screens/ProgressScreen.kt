@@ -1,19 +1,23 @@
 package ui.screens
 
+import androidx.compose.foundation.*
 import train.Train
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import getWorkArea
@@ -46,6 +50,8 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
     val modifierRouteTextField = Modifier.fillMaxHeight(0.9f).verticalScroll(scrollState)
     val padding = 20
 
+    val focusRequester = remember { FocusRequester() }
+
     Column{
         resizeImage(imageScaled, scale, image)
         Image(getWorkArea(imageScaled,currentCorner(),workArea,parts,padding).toComposeImageBitmap(),"Область графика с началом движения")
@@ -53,28 +59,32 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
         Row {
             Button(onClick = {
                 workArea = max(workArea - 1,0)
+                focusRequester.requestFocus()
+
             }){
                 Text("<<")
             }
             Button(onClick = {
                 workArea = min(workArea + 1,parts-1)
+                focusRequester.requestFocus()
             }){
                 Text(">>")
             }
         }
         Row{
+    /*
+    * Column{
+    *     Row{
+    *       TextField маршрут
+    *       TextField поезд
+    * }
+    * }
+    * для updateRoutes2 берем массив
+    * */
             TextField(
                 value = textFieldVal, onValueChange = {
-
-                    println(Date())
-                    println(scrollState.value)
-                    println(1)
                     var prevCursorPositionEnd = it.selection.end == it.text.length
-                    println(scrollState.value)
-                    println(2)
                     onRouteTextFieldUpdate(it)
-                    println(scrollState.value)
-                    println(3)
                     if (prevCursorPositionEnd) {
                         coroutineScope.launch {
                             scrollState.animateScrollTo(scrollState.maxValue+100)
@@ -82,11 +92,14 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
 
                         workArea = corners[currentCorner()].x * parts / image.width
                     }
-                    println(scrollState.value)
-                    println(4)
                 },
-                modifier = modifierRouteTextField.padding(0.dp,0.dp,12.dp,0.dp),
+
+                modifier = modifierRouteTextField
+                    .padding(0.dp,0.dp,12.dp,0.dp)
+                    .focusRequester(focusRequester)
+                ,
             )
+
             TextField(trains.joinToString("\n"),
                 onValueChange = {},
                 enabled = false,

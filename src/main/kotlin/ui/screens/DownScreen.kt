@@ -8,16 +8,17 @@ import androidx.compose.ui.text.input.TextFieldValue
 import drawCorner
 import formListTrainsInSecondLine
 import getBoxes2
+import train.SecondLineRoutesCollection
+import train.Train
+import train.UtilSaver
 import updateRoutes2
 import java.awt.Point
 import java.awt.image.BufferedImage
 import java.io.File
 import java.util.*
-import kotlin.math.abs
-import kotlin.math.min
 
 @Composable
-fun DownPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit, trains: MutableList<train.Train>){
+fun DownPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit, returnMessage: (String)-> Unit, trains: MutableList<train.Train>){
     var corners by remember { mutableStateOf(mutableListOf<Point>()) }
     var currentCorner by remember { mutableStateOf(-1) }
 
@@ -43,32 +44,33 @@ fun DownPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, mi
                 GrayColorSchemeConverter().convert(image)))
 
         corners.sortBy {it.x}
-        for(i in 0..<min(corners.size,45)){
-            if(platform1y < corners[i].y){
-                platform1y = corners[i].y
-            }
-        }
-        var countPlayform1 = 0
-        for(i in 0..<min(10,corners.size)){
-            if(abs(platform1y - corners[i].y) < 4){
-                countPlayform1++
-            }
-        }
-        if (countPlayform1 == min(10,corners.size)){
-            platform1y = 0
-        }
+//        for(i in 0..<min(corners.size,45)){
+//            if(platform1y < corners[i].y){
+//                platform1y = corners[i].y
+//            }
+//        }
+//        var countPlayform1 = 0
+//        for(i in 0..<min(10,corners.size)){
+//            if(abs(platform1y - corners[i].y) < 4){
+//                countPlayform1++
+//            }
+//        }
+//        if (countPlayform1 == min(10,corners.size)){
+//            platform1y = 0
+//        }
 
         currentCorner = -1
         currentCorner = updateRoutes2(textFieldVal, textFieldVal, trains2, image, corners, date!!, 0, minutes, platform1y,null,null,MutableList<String>(corners.size,{""}))
         drawCorner(image,corners[0])
 
         secondLineRoutesCollection = formListTrainsInSecondLine(trains, recognisedRoutes)
+//        print(secondLineRoutesCollection)
 
     }
     ProgressScreen(
         image.getSubimage(0,image.height*3/4,image.width,image.height/4),
         trains2,
-        corners,{ return@ProgressScreen currentCorner; },textFieldVal, goNext,{},{
+        corners,{ currentCorner; },textFieldVal, goNext,{},{
         currentCorner = updateRoutes2(it, textFieldVal, trains2, image, corners, date!!, 0, minutes, platform1y,null,null,MutableList<String>(corners.size,{""}))
         if (it.text == textFieldVal.text+"\n"){
             if(offsetForRecognisedRoutes == 0 || offsetForRecognisedRoutes >= recognisedRoutes.size){
@@ -90,6 +92,10 @@ fun DownPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, mi
         drawCorner(image,corners[currentCorner]);
     },
         {
-            train.TrainSaver(file.parent  + "/!!!down"+ file.nameWithoutExtension + ".txt").save(trains2)
+            val fileTrainStart = File(file.parent  + "/!!!down_"+ file.nameWithoutExtension + ".txt")
+            UtilSaver<Train>(fileTrainStart.absolutePath).save(trains2)
+            var fileTrainIntervals = File(file.parent  + "/!!!intervals_"+ file.nameWithoutExtension + ".txt")
+            UtilSaver<SecondLineRoutesCollection>(fileTrainIntervals.absolutePath).save(listOf(secondLineRoutesCollection))
+            returnMessage("Файл ${file.absolutePath} сохранен")
         })
 }

@@ -24,6 +24,7 @@ import kotlin.math.min
 fun MainSettingsScreen(onFileSelected:(File?)->Unit,
                        onTimeStartSet:(Calendar)->Unit,
                        onTimeDiapasoneInMinutesSet:(Int)->Unit,
+                       direcory:(File?)->File,
                        goNext:() -> Unit){
 
     var timeStart by remember { mutableStateOf(Calendar.Builder().build()) }
@@ -32,7 +33,15 @@ fun MainSettingsScreen(onFileSelected:(File?)->Unit,
     var nextDay by remember { mutableStateOf(true) }
 
     Column{
-        SelectFileButton("Выбрать изображение",{ file = it; onFileSelected(file) },{ getImageSource() })
+        SelectFileButton("Выбрать изображение",
+            {
+                it?.let{
+                    file = it;
+                    onFileSelected(file);
+                    direcory(file!!.parentFile)
+                }
+            },
+            { getImageSource(direcory(null)) })
 
         Text("Время начала")
         MyTimePicker(5,30, { timeStart = it })

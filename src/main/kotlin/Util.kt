@@ -34,29 +34,64 @@ fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<In
     var secondLineEnd = HashMap<Int, Train>()
     var secondLine = SecondLineRoutesCollection()
     for (i in trains.indices){
-        if (trainSet.containsKey(trains[i].route)){
-            if (trainSet[trains[i].route]!! > currentIndex){
-                currentIndex = trainSet[trains[i].route]!!
-                if (!secondLineStart.contains(trains[i].route)){
-                    secondLineStart[trains[i].route] = trains[trainSet[trains[i].route]!!]
-                }
-                secondLineEnd[trains[i].route] = trains[i]
-                listOfRoutes.add(trains[i].route)
+        // new form function on platforms
+        if (trains[i].platform == 1){
+            if(!secondLineStart.containsKey(trains[i].route)){
+                secondLineStart[trains[i].route] = trains[i]
+            }
+            secondLineEnd[trains[i].route] = trains[i]
+            if(trains[i].isGoingToDepo){
+                secondLine.addDiapasone(
+                    trains[i].route,
+                    Pair(secondLineStart.remove(trains[i].route)!!.time,
+                        secondLineEnd.remove(trains[i].route)!!.time))
             } else {
-                // to do
-                if (secondLineStart.containsKey(trains[i].route)){
-
-                    secondLine.addDiapasone(
-                        trains[i].route,
-                        Pair(secondLineStart.remove(trains[i].route)!!.time,
-                            secondLineEnd.remove(trains[i].route)!!.time))
-                }
-                // check if trains was on second line
-                // make line
-                // if gong to depo
+                listOfRoutes.add(trains[i].route)
+            }
+        } else {
+            if(secondLineStart.containsKey(trains[i].route)){
+                secondLine.addDiapasone(
+                    trains[i].route,
+                    Pair(secondLineStart.remove(trains[i].route)!!.time,
+                        trains[i].time))
+                secondLineEnd.remove(trains[i].route)
             }
         }
-        trainSet[trains[i].route] = i
+
+//        if (trainSet.containsKey(trains[i].route)){
+//            if (trainSet[trains[i].route]!! > currentIndex){
+//                currentIndex = trainSet[trains[i].route]!!
+//                if (!secondLineStart.contains(trains[i].route)){
+//                    secondLineStart[trains[i].route] = trains[trainSet[trains[i].route]!!]
+//                }
+//                // to do
+//                // prev train is going from depo
+//                // exclude
+//                secondLineEnd[trains[i].route] = trains[i]
+//
+//                if(secondLineStart[trains[i].route]!!.isGoingToDepo){
+//                    secondLine.addDiapasone(
+//                        trains[i].route,
+//                        Pair(secondLineStart.remove(trains[i].route)!!.time,
+//                            secondLineEnd.remove(trains[i].route)!!.time))
+//                } else {
+//                    listOfRoutes.add(trains[i].route)
+//                }
+//            } else {
+//                // to do
+//                if (secondLineStart.containsKey(trains[i].route)){
+//
+//                    secondLine.addDiapasone(
+//                        trains[i].route,
+//                        Pair(secondLineStart.remove(trains[i].route)!!.time,
+//                            secondLineEnd.remove(trains[i].route)!!.time))
+//                }
+//                // check if trains was on second line
+//                // make line
+//                // if gong to depo
+//            }
+//        }
+//        trainSet[trains[i].route] = i
     }
     var routesRemains = secondLineStart.values.toMutableList()
     for(i in 0..<routesRemains.size){
@@ -69,8 +104,7 @@ fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<In
         )
     }
 
-    println("secondLineStart${secondLineStart}\nsecondLineEnd${secondLineEnd}")
-    println(secondLine)
+//    println(secondLine)
     return secondLine
 }
 

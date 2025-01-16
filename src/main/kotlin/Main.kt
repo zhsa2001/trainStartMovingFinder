@@ -5,6 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -29,11 +30,20 @@ fun App() {
     var countOfMinutes by remember { mutableStateOf(0) }
     var trains by remember { mutableStateOf(mutableListOf<Train>()) }
 
+
+    var previousPath by remember { mutableStateOf(File("")) }
+
+    val setPreviousPath:(File?)->File = {
+        it?.let {
+            previousPath = it
+        }
+        previousPath
+    }
+
     val returnToStart:()->Unit = {stage = UIStage.START}
     MaterialTheme {
 
         Box(modifier = Modifier.padding(12.dp)){
-
             when(stage){
                 UIStage.START -> StartScreen({ stage = UIStage.SETTINGS_PROCESSING_UP},
                     { stage = UIStage.SETTINGS_PROCESSING_DOWN})
@@ -41,12 +51,14 @@ fun App() {
                     { it?.let { file = it } },
                     { date = it },
                     { countOfMinutes = it },
+                    setPreviousPath,
                     { stage = UIStage.ROUTE_PROCESSING_UP }
                 )
                 UIStage.SETTINGS_PROCESSING_DOWN -> DownSettingsScreen(
                     { it?.let { file = it } },
                     { date = it },
                     { countOfMinutes = it },
+                    setPreviousPath,
                     { stage = UIStage.ROUTE_PROCESSING_DOWN },
                     { it?.let { trains = getTrainsFromFile(it) } }
                 )
@@ -58,7 +70,8 @@ fun App() {
                         date,
                         countOfMinutes,
                         { stage = UIStage.DONE },
-                        { returnToStart() }
+                        { returnToStart() },
+                        { message = it }
                     )
                 }
                 UIStage.ROUTE_PROCESSING_DOWN -> {
@@ -72,6 +85,7 @@ fun App() {
                             trains.clear()
                         },
                         { returnToStart() },
+                        { message = it },
                         trains
                     )
                 }

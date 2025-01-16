@@ -11,6 +11,10 @@ import folderSubimages
 import getBoxes
 import getHorisontalLines
 import getSubArea
+import io.ktor.utils.io.*
+import io.ktor.utils.io.locks.*
+import kotlinx.coroutines.Dispatchers
+
 import kotlinx.coroutines.launch
 import train.Train
 import updateRoutes2
@@ -21,8 +25,9 @@ import java.util.*
 import kotlin.math.PI
 import kotlin.math.min
 
+@OptIn(InternalAPI::class)
 @Composable
-fun UpPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit) {
+fun UpPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit, returnMessage: (String)-> Unit,) {
     val trains by remember { mutableStateOf(mutableListOf<Train>()) }
     var platform1y by remember { mutableStateOf(image.height) }
     var recognizedRoutes by remember { mutableStateOf(mutableListOf<String>()) }
@@ -61,28 +66,33 @@ fun UpPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minu
             ))[2].y
         var countAll = corners.size
         var countRecognized = 0
-        var currentCount = 0
+//        var currentCount = 0
         val height = 30
 //        coroutineScope.launch {
 //////            var jobs = mutableListOf<Job>()
         var job = coroutineScopeForSendRequest.launch {
+            val dispatcher = Dispatchers.Default.limitedParallelism(3)
+            println("asu")
             for(i in 0..<corners.size){
 ////                List<Job>(20,{
 ////                break
-
-
-                currentCount++
-                recognizedRoutes[i] = (getSubArea(
-                    image, Point(corners[i].x, y), -PI * 58 / 180, Point(
-                        if (i + 1 < corners.size)
-                            corners[i + 1].x
-                        else
-                            corners[i].x + height, y
-                    )
-                ))
+                launch(dispatcher) {
+//                    println("$i ${Thread.currentThread().name}")
+//                    currentCount++
+                    recognizedRoutes[i] = (getSubArea(
+                        image, Point(corners[i].x, y), -PI * 58 / 180, Point(
+                            if (i + 1 < corners.size)
+                                corners[i + 1].x
+                            else
+                                corners[i].x + height, y
+                        )
+                    ))
 //                    println(recognizedRoutes[i])
-                if (recognizedRoutes[i].isNotEmpty()) {
-                    countRecognized++
+                    if (recognizedRoutes[i].isNotEmpty()) {
+                        synchronized(countRecognized){
+                            countRecognized++
+                        }
+                    }
                 }
             }
 
@@ -120,7 +130,7 @@ fun UpPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minu
     ProgressScreen(
         image.getSubimage(0,0,image.width,image.height/4),
         trains,
-        corners,{ return@ProgressScreen currentCorner; },
+        corners,{ currentCorner; },
         textFieldVal,
         goNext,{},{
             currentCorner = updateRoutes2(it, textFieldVal, trains, image, corners, date!!, 0, minutes, platform1y,null,null,recognizedRoutes)
@@ -132,7 +142,9 @@ fun UpPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minu
             drawCorner(image,corners[currentCorner]);
         },
         {
-            train.TrainSaver(file.parent  + "/!!!up"+ file.nameWithoutExtension + ".txt").save(trains)
+            val file = File(file.parent  + "/!!!up"+ file.nameWithoutExtension + ".txt")
+            train.UtilSaver<Train>(file.absolutePath).save(trains)
+            returnMessage("Файл ${file.absolutePath} сохранен")
         }
     )
 }
