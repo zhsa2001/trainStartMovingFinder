@@ -40,6 +40,7 @@ fun App() {
         previousPath
     }
 
+
     val returnToStart:()->Unit = {stage = UIStage.START}
     MaterialTheme {
 
@@ -52,6 +53,7 @@ fun App() {
                     { date = it },
                     { countOfMinutes = it },
                     setPreviousPath,
+                    returnToStart,
                     { stage = UIStage.ROUTE_PROCESSING_UP }
                 )
                 UIStage.SETTINGS_PROCESSING_DOWN -> DownSettingsScreen(
@@ -59,24 +61,23 @@ fun App() {
                     { date = it },
                     { countOfMinutes = it },
                     setPreviousPath,
+                    returnToStart,
                     { stage = UIStage.ROUTE_PROCESSING_DOWN },
                     { it?.let { trains = getTrainsFromFile(it) } }
                 )
 
                 UIStage.ROUTE_PROCESSING_UP -> {
                     UpPartProgressScreen(
-                        ImageIO.read(file!!),
                         file!!,
                         date,
                         countOfMinutes,
                         { stage = UIStage.DONE },
-                        { returnToStart() },
+                        returnToStart,
                         { message = it }
                     )
                 }
                 UIStage.ROUTE_PROCESSING_DOWN -> {
                     DownPartProgressScreen(
-                        ImageIO.read(file!!),
                         file!!,
                         date,
                         countOfMinutes,
@@ -84,14 +85,14 @@ fun App() {
                             stage = UIStage.DONE;
                             trains.clear()
                         },
-                        { returnToStart() },
+                        returnToStart,
                         { message = it },
                         trains
                     )
                 }
                 UIStage.DONE -> {
                     ResultScreen(message,
-                        { returnToStart() }
+                        returnToStart
                     )
                 }
             }

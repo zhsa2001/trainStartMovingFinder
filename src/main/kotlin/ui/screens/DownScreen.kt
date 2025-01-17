@@ -16,9 +16,11 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 import java.io.File
 import java.util.*
+import javax.imageio.ImageIO
 
 @Composable
-fun DownPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit, returnMessage: (String)-> Unit, trains: MutableList<train.Train>){
+fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit, returnMessage: (String)-> Unit, trains: MutableList<train.Train>){
+    var image by remember { mutableStateOf<BufferedImage?>(null) }
     var corners by remember { mutableStateOf(mutableListOf<Point>()) }
     var currentCorner by remember { mutableStateOf(-1) }
 
@@ -26,7 +28,7 @@ fun DownPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, mi
     var recognisedRoutes by remember { mutableStateOf(mutableListOf<Int>()) }
     var offsetForRecognisedRoutes by remember { mutableStateOf(0) }
 
-
+    var isStopped by remember { mutableStateOf(false) }
     var textFieldVal by remember {
         mutableStateOf(
             TextFieldValue(
@@ -39,63 +41,105 @@ fun DownPartProgressScreen(image: BufferedImage, file: File, date: Calendar?, mi
     var platform1y by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit){
-        corners = getBoxes2(
-            BinaryColorSchemeConverter(170).convert(
-                GrayColorSchemeConverter().convert(image)))
+        try {
+            image = ImageIO.read(file)
 
-        corners.sortBy {it.x}
-//        for(i in 0..<min(corners.size,45)){
-//            if(platform1y < corners[i].y){
-//                platform1y = corners[i].y
-//            }
-//        }
-//        var countPlayform1 = 0
-//        for(i in 0..<min(10,corners.size)){
-//            if(abs(platform1y - corners[i].y) < 4){
-//                countPlayform1++
-//            }
-//        }
-//        if (countPlayform1 == min(10,corners.size)){
-//            platform1y = 0
-//        }
+            if(!isStopped) {
+                corners = getBoxes2(
+                    BinaryColorSchemeConverter(200).convert(
+                        GrayColorSchemeConverter().convert(image!!)
+                    )
+                )
+            }
+            if(!isStopped) {
+                corners.sortBy {it.x}
+            }
 
-        currentCorner = -1
-        currentCorner = updateRoutes2(textFieldVal, textFieldVal, trains2, image, corners, date!!, 0, minutes, platform1y,null,null,MutableList<String>(corners.size,{""}))
-        drawCorner(image,corners[0])
-
-        secondLineRoutesCollection = formListTrainsInSecondLine(trains, recognisedRoutes)
+            if(!isStopped) {
+                currentCorner = -1
+                currentCorner = updateRoutes2(
+                    textFieldVal,
+                    textFieldVal,
+                    trains2,
+                    image!!,
+                    corners,
+                    date!!,
+                    0,
+                    minutes,
+                    platform1y,
+                    null,
+                    null,
+                    MutableList<String>(corners.size, { "" })
+                )
+                drawCorner(image!!, corners[0])
+            }
+            if(!isStopped) {
+                secondLineRoutesCollection = formListTrainsInSecondLine(trains, recognisedRoutes)
+            }
+        } catch(_:Exception){
+            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath}")
+            goNext()
+        }
 //        print(secondLineRoutesCollection)
 
     }
-    ProgressScreen(
-        image.getSubimage(0,image.height*3/4,image.width,image.height/4),
-        trains2,
-        corners,{ currentCorner; },textFieldVal, goNext,{},{
-        currentCorner = updateRoutes2(it, textFieldVal, trains2, image, corners, date!!, 0, minutes, platform1y,null,null,MutableList<String>(corners.size,{""}))
-        if (it.text == textFieldVal.text+"\n"){
-            if(offsetForRecognisedRoutes == 0 || offsetForRecognisedRoutes >= recognisedRoutes.size){
-                textFieldVal = TextFieldValue(it.text, TextRange(it.text.length))
-            } else {
-                textFieldVal = TextFieldValue(it.text + recognisedRoutes[offsetForRecognisedRoutes], TextRange(it.text.length+recognisedRoutes[offsetForRecognisedRoutes].toString().length))
-                trains2[currentCorner].route = recognisedRoutes[offsetForRecognisedRoutes]
-                offsetForRecognisedRoutes++
 
-            }
-        } else {
-            textFieldVal = it
-            if(offsetForRecognisedRoutes == 0 && offsetForRecognisedRoutes < recognisedRoutes.size) {
-                if (recognisedRoutes[offsetForRecognisedRoutes] == trains2[currentCorner].route) {
-                    offsetForRecognisedRoutes++
+    image?.let {
+        val image = image!!
+        ProgressScreen(
+            image.getSubimage(0, image.height * 3 / 4, image.width, image.height / 4),
+            trains2,
+            corners, { currentCorner; }, textFieldVal, goNext, {}, {
+                currentCorner = updateRoutes2(
+                    it,
+                    textFieldVal,
+                    trains2,
+                    image,
+                    corners,
+                    date!!,
+                    0,
+                    minutes,
+                    platform1y,
+                    null,
+                    null,
+                    MutableList<String>(corners.size, { "" })
+                )
+                if (it.text == textFieldVal.text + "\n") {
+                    if (offsetForRecognisedRoutes == 0 || offsetForRecognisedRoutes >= recognisedRoutes.size) {
+                        textFieldVal = TextFieldValue(it.text, TextRange(it.text.length))
+                    } else {
+                        textFieldVal = TextFieldValue(
+                            it.text + recognisedRoutes[offsetForRecognisedRoutes],
+                            TextRange(it.text.length + recognisedRoutes[offsetForRecognisedRoutes].toString().length)
+                        )
+                        trains2[currentCorner].route = recognisedRoutes[offsetForRecognisedRoutes]
+                        offsetForRecognisedRoutes++
+
+                    }
+                } else {
+                    textFieldVal = it
+                    if (offsetForRecognisedRoutes == 0 && offsetForRecognisedRoutes < recognisedRoutes.size) {
+                        if (recognisedRoutes[offsetForRecognisedRoutes] == trains2[currentCorner].route) {
+                            offsetForRecognisedRoutes++
+                        }
+                    }
                 }
-            }
-        }
-        drawCorner(image,corners[currentCorner]);
-    },
-        {
-            val fileTrainStart = File(file.parent  + "/!!!down_"+ file.nameWithoutExtension + ".txt")
-            UtilSaver<Train>(fileTrainStart.absolutePath).save(trains2)
-            var fileTrainIntervals = File(file.parent  + "/!!!intervals_"+ file.nameWithoutExtension + ".txt")
-            UtilSaver<SecondLineRoutesCollection>(fileTrainIntervals.absolutePath).save(listOf(secondLineRoutesCollection))
-            returnMessage("Файл ${file.absolutePath} сохранен")
-        })
+                drawCorner(image, corners[currentCorner]);
+            },
+            {
+                val fileTrainStart = File(file.parent + "/!!!down_" + file.nameWithoutExtension + ".txt")
+                UtilSaver<Train>(fileTrainStart.absolutePath).save(trains2)
+                var fileTrainIntervals = File(file.parent + "/!!!intervals_" + file.nameWithoutExtension + ".txt")
+                UtilSaver<SecondLineRoutesCollection>(fileTrainIntervals.absolutePath).save(
+                    listOf(
+                        secondLineRoutesCollection
+                    )
+                )
+                returnMessage("Файлы ${fileTrainStart.absolutePath} и \n${fileTrainIntervals.absolutePath} сохранены")
+            },
+            {
+                isStopped = true
+                returnToStart()
+            })
+    }
 }

@@ -257,14 +257,11 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
 
     val file = File("$folderSubimages\\draw_${corner.x}.png")
     onlyRed(imageSmoothed)
-//    withContext(Dispatchers.IO) {
 
-//    }
 
     var res = ""
     var resASP = ASP(imageSmoothed)
-//    var res = ""
-//    res.forEach { print("--$it--") }
+
     println("ASP ${resASP}")
     if (resASP.length in 1..2 && checkIsNum(resASP) || mayBeIs2DigitNum(resASP)){
         if (mayBeIs2DigitNum(resASP)) {
@@ -278,8 +275,6 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
             ImageIO.write(imageSmoothed, "PNG", file)
             var resTess = tess(file)
             println("Tess ${resTess}")
-//        res = SpaceOCR.sendImage(file)
-
             if (resTess.length in 1..2 && checkIsNum(resTess) || mayBeIs2DigitNum(resTess) || mayBeIs1DigitNum(resASP)) {
                 if (mayBeIs2DigitNum(resTess)) {
                     res = resTess.substring(resTess.length - 2)
@@ -297,9 +292,7 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
                 }
             }
         }
-
     }
-//    readln()
     return res
 
 }
@@ -328,30 +321,6 @@ fun onlyRed(image: BufferedImage){
     }
 }
 
-
-fun onlyGreen(image: BufferedImage){
-    val raster = image.data
-    var pixel = IntArray(4)
-    var threshold2 = 20
-    for(i in 0..<image.width){
-        for(j in 0..<image.height){
-            raster.getPixel(i,j,pixel)
-            if (pixel[2] - pixel[1] > threshold2 && pixel[2] - pixel[0] > threshold2) {
-////                pixel.forEach { print("$it ") }
-////                readln()
-            } else {
-                var argb = 0
-//                argb += (0 as Int and 0xff) shl 24 // alpha value
-                argb += (255 as Int and 0xff) // blue value
-                argb += (255 as Int and 0xff) shl 8 // green value
-                argb += (255 as Int and 0xff) shl 16 // red value
-
-                image.setRGB(i,j,argb)
-
-            }
-        }
-    }
-}
 
 fun mayBeIs2DigitNum(s: String): Boolean {
     return s.length > 2 &&
@@ -505,16 +474,21 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
 }
 
 fun getTrainsFromFile(file: File, tab: String = "\t"): MutableList<Train> {
-    var trainLines = Files.readAllLines(file.toPath())
-    var trains = mutableListOf<Train>()
-    for(line in trainLines){
-        val data = line.split(tab)
-        val train = Train()
-        train.time = train.dateTimeFormat.parse(data[0])
-        train.platform = data[1].toInt()
-        train.route = data[2].toInt()
-        train.isGoingToDepo = data[3].toInt() == 1
-        trains.add(train)
+    val trains = mutableListOf<Train>()
+    try{
+        val trainLines = Files.readAllLines(file.toPath())
+
+        for(line in trainLines){
+            val data = line.split(tab)
+            val train = Train()
+            train.time = train.dateTimeFormat.parse(data[0])
+            train.platform = data[1].toInt()
+            train.route = data[2].toInt()
+            train.isGoingToDepo = data[3].toInt() == 1
+            trains.add(train)
+        }
+    } catch(e:Exception){
+
     }
     return trains
 }

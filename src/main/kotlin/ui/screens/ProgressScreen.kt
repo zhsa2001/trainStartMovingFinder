@@ -36,7 +36,8 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
                    goNext: () -> Unit,
                    returnToStart:()->Unit,
                    onRouteTextFieldUpdate: (TextFieldValue)->Unit,
-                   save: ()->Unit) {
+                   save: ()->Unit,
+                   onStopRequest:()->Unit) {
     val scale = 2.0
     val imageScaled = BufferedImage((image.width * scale).toInt(), (image.height * scale).toInt(), BufferedImage.TYPE_INT_RGB)
 
@@ -53,6 +54,11 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
     val focusRequester = remember { FocusRequester() }
 
     Column{
+        Button(onClick = {
+            onStopRequest()
+        }){
+            Text("Отменить")
+        }
         resizeImage(imageScaled, scale, image)
         Image(getWorkArea(imageScaled,currentCorner(),workArea,parts,padding).toComposeImageBitmap(),"Область графика с началом движения")
 

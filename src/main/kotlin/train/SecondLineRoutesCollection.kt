@@ -9,10 +9,7 @@ class SecondLineRoutesCollection: SavebleInfo {
         if(!routes.containsKey(route)){
             routes[route] = SecondLineDiapasones()
         }
-        routes[route]!!.timeDiapasones.add(diapasone)
-    }
-    fun inDiapasone(route: Int, time: Date): Boolean{
-        return routes.containsKey(route) && routes[route]!!.isInTimeDiapasone(time)
+        routes[route]!!.add(diapasone)
     }
 
     override fun info(tab: String): String {

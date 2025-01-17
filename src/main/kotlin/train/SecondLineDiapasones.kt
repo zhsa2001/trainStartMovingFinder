@@ -4,14 +4,15 @@ import java.util.*
 
 class SecondLineDiapasones {
     val timeDiapasones = mutableListOf<Pair<Date, Date>>()
-    fun isInTimeDiapasone(time: Date): Boolean{
-        var flag = false
-        for(el in timeDiapasones){
-            if(el.first < time && el.second > time){
-                flag = true
-                break
-            }
+    val middleOfNight = Calendar.Builder().setTimeOfDay(0,0,0).build().time
+
+    fun add(diapasone: Pair<Date, Date>){
+        if(diapasone.second < diapasone.first){
+            timeDiapasones.add(Pair(middleOfNight,diapasone.second))
+            timeDiapasones.add(Pair(diapasone.first,middleOfNight))
+        } else {
+            timeDiapasones.add(diapasone)
         }
-        return flag
+        timeDiapasones.sortBy { if (it.first != middleOfNight && it.second != middleOfNight) it.second else it.first }
     }
 }

@@ -25,6 +25,7 @@ fun MainSettingsScreen(onFileSelected:(File?)->Unit,
                        onTimeStartSet:(Calendar)->Unit,
                        onTimeDiapasoneInMinutesSet:(Int)->Unit,
                        direcory:(File?)->File,
+                       returnToStart:()->Unit,
                        goNext:() -> Unit){
 
     var timeStart by remember { mutableStateOf(Calendar.Builder().build()) }
@@ -62,6 +63,9 @@ fun MainSettingsScreen(onFileSelected:(File?)->Unit,
                 goNext() }){
                 Text("Продолжить")
             }
+        }
+        Button(onClick = returnToStart){
+            Text("Назад")
         }
     }
 }

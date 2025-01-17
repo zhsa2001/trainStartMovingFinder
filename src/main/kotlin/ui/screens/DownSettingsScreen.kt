@@ -12,6 +12,7 @@ fun DownSettingsScreen(onFileSelected:(File?)->Unit,
                        onTimeStartSet:(Calendar)->Unit,
                        onTimeDiapasoneInMinutesSet:(Int)->Unit,
                        direcory:(File?)->File,
+                       returnToStart:()->Unit,
                        goNext:() -> Unit,
                        onFileWithUpSelected: (File?)->Unit){
     var file by remember { mutableStateOf<File?>(null) }
@@ -29,6 +30,7 @@ fun DownSettingsScreen(onFileSelected:(File?)->Unit,
             onTimeStartSet,
             onTimeDiapasoneInMinutesSet,
             direcory,
+            returnToStart,
             goNext
         )
     }
