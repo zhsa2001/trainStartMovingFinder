@@ -14,10 +14,10 @@ import ui.UIStage
 import ui.screens.*
 import java.io.File
 import java.util.*
-import javax.imageio.ImageIO
 
 
 val folderSubimages = "subimages"
+val asposeFolder = "aspose_data"
 
 
 @Composable

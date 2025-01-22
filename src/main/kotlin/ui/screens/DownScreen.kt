@@ -67,8 +67,6 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
                     0,
                     minutes,
                     platform1y,
-                    null,
-                    null,
                     MutableList<String>(corners.size, { "" })
                 )
                 drawCorner(image!!, corners[0])
@@ -80,8 +78,6 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
             returnMessage("Произошла ошибка при обработке файла ${file.absolutePath}")
             goNext()
         }
-//        print(secondLineRoutesCollection)
-
     }
 
     image?.let {
@@ -100,8 +96,6 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
                     0,
                     minutes,
                     platform1y,
-                    null,
-                    null,
                     MutableList<String>(corners.size, { "" })
                 )
                 if (it.text == textFieldVal.text + "\n") {
@@ -127,9 +121,9 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
                 drawCorner(image, corners[currentCorner]);
             },
             {
-                val fileTrainStart = File(file.parent + "/!!!down_" + file.nameWithoutExtension + ".txt")
+                val fileTrainStart = File(file.parent + "/down_" + file.nameWithoutExtension + ".txt")
                 UtilSaver<Train>(fileTrainStart.absolutePath).save(trains2)
-                var fileTrainIntervals = File(file.parent + "/!!!intervals_" + file.nameWithoutExtension + ".txt")
+                var fileTrainIntervals = File(file.parent + "/intervals_" + file.nameWithoutExtension + ".txt")
                 UtilSaver<SecondLineRoutesCollection>(fileTrainIntervals.absolutePath).save(
                     listOf(
                         secondLineRoutesCollection

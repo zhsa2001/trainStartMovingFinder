@@ -6,7 +6,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 
 @Composable
@@ -22,7 +21,6 @@ fun ResultScreen(message: String, returnToStart:()->Unit){
         }
         Column{
             val state = rememberScrollState()
-            LaunchedEffect(Unit) { state.animateScrollTo(100) }
             Text(message, Modifier.verticalScroll(state))
         }
     }

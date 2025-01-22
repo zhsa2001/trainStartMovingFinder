@@ -2,23 +2,17 @@ package ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.unit.dp
-import checkIsNum
 import ui.MyTimePicker
 import ui.SelectFileButton
 import ui.utils.getImageSource
 import java.io.File
 import java.util.*
-import kotlin.math.min
 
 @Composable
 fun MainSettingsScreen(onFileSelected:(File?)->Unit,

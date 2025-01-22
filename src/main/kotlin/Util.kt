@@ -1,13 +1,11 @@
-
-import ImageProcessing.*
+import ImageProcessing.findDownCorner
+import ImageProcessing.findHorizontalLine
+import ImageProcessing.findUpCorner
 import OCR.ASP
 import OCR.SpaceOCR.SpaceOCR
 import OCR.tess
-import androidx.compose.foundation.ScrollState
 import androidx.compose.ui.text.input.TextFieldValue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import train.SecondLineRoutesCollection
 import train.Train
@@ -23,18 +21,11 @@ import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.math.min
 
-val errorMessageStart = "Ошибка обработки файла"
-
-
-
 fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<Int> = mutableListOf<Int>()): SecondLineRoutesCollection {
-    val trainSet = HashMap<Int,Int>()
-    var currentIndex = 0
     var secondLineStart = HashMap<Int, Train>()
     var secondLineEnd = HashMap<Int, Train>()
     var secondLine = SecondLineRoutesCollection()
     for (i in trains.indices){
-        // new form function on platforms
         if (trains[i].platform == 1){
             if(!secondLineStart.containsKey(trains[i].route)){
                 secondLineStart[trains[i].route] = trains[i]
@@ -58,40 +49,6 @@ fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<In
             }
         }
 
-//        if (trainSet.containsKey(trains[i].route)){
-//            if (trainSet[trains[i].route]!! > currentIndex){
-//                currentIndex = trainSet[trains[i].route]!!
-//                if (!secondLineStart.contains(trains[i].route)){
-//                    secondLineStart[trains[i].route] = trains[trainSet[trains[i].route]!!]
-//                }
-//                // to do
-//                // prev train is going from depo
-//                // exclude
-//                secondLineEnd[trains[i].route] = trains[i]
-//
-//                if(secondLineStart[trains[i].route]!!.isGoingToDepo){
-//                    secondLine.addDiapasone(
-//                        trains[i].route,
-//                        Pair(secondLineStart.remove(trains[i].route)!!.time,
-//                            secondLineEnd.remove(trains[i].route)!!.time))
-//                } else {
-//                    listOfRoutes.add(trains[i].route)
-//                }
-//            } else {
-//                // to do
-//                if (secondLineStart.containsKey(trains[i].route)){
-//
-//                    secondLine.addDiapasone(
-//                        trains[i].route,
-//                        Pair(secondLineStart.remove(trains[i].route)!!.time,
-//                            secondLineEnd.remove(trains[i].route)!!.time))
-//                }
-//                // check if trains was on second line
-//                // make line
-//                // if gong to depo
-//            }
-//        }
-//        trainSet[trains[i].route] = i
     }
     var routesRemains = secondLineStart.values.toMutableList()
     for(i in 0..<routesRemains.size){
@@ -103,8 +60,6 @@ fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<In
             )
         )
     }
-
-//    println(secondLine)
     return secondLine
 }
 
@@ -165,15 +120,6 @@ fun getBoxes(grayImage: BufferedImage, boxSize: Int = 30): MutableList<Point> {
 fun getBoxes2(grayImage: BufferedImage, boxSize: Int = 30): MutableList<Point> {
     val corners = mutableListOf<Point>()
     val lines = getHorisontalLines(grayImage)
-//    val d = grayImage.createGraphics()
-//    d.color = Color.ORANGE
-//    d.drawRect(grayImage.width/2,lines[lines.size-1].y,50,50)
-//    ImageIO.write(grayImage,"PNG",File("ggg.png"))
-//    for(i in lines[lines.size-1].y..<grayImage.height-boxSize step 10){
-//        for(j in 0..grayImage.width-1-boxSize step 4){
-//            findDownCorner(grayImage,j,i,boxSize,corners)
-//        }
-//    }
     for(i in lines[lines.size-1].y..<grayImage.height-boxSize step 10){
         for(j in 0..grayImage.width-1-boxSize step 4){
             findDownCorner(grayImage,j,i,boxSize,corners)
@@ -227,29 +173,16 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
     var imageForScaling = BufferedImage(width,width + height,BufferedImage.TYPE_INT_RGB)
     var drawImageForScaling = imageForScaling.createGraphics()
 
-//    drawImage.translate(0,height)
-//    drawImage.rotate(angle)
     drawImageForScaling.translate(-corner.x,-corner.y + height)
     drawImageForScaling.drawImage(image,0,0,null)
 
     val scale = 5.0
     var imageForRotate = BufferedImage((width * scale).toInt(), (height * scale).toInt(),BufferedImage.TYPE_INT_RGB)
     val drawImageForRotate = imageForRotate.createGraphics()
-//
-
-    val transforms = drawImageForRotate.transform
-//    transforms.translate(0.0,(height * scale))
     drawImageForRotate.translate(0,(height * scale).toInt())
     drawImageForRotate.rotate(angle)
-//    transforms.rotate(angle)
     drawImageForRotate.translate(0,-(height * scale).toInt())
-//    transforms.translate(0.0,-(height * scale))
-
     drawImageForRotate.drawImage(imageForScaling.getScaledInstance((width * scale).toInt(),((width + height) * scale).toInt(), Image.SCALE_SMOOTH),0,0,null)
-//    imageForRotate = GaussFilter(3,2.8).filter(imageForRotate)
-//    onlyRed(imageForRotate)
-//    drawImageForRotate.drawImage(imageForRotate.getScaledInstance(width, height, Image.SCALE_SMOOTH),0,0,null)
-
     var imageSmoothed = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     imageSmoothed.createGraphics().drawImage(
         imageForRotate.getScaledInstance((width).toInt(),(height).toInt(),Image.SCALE_AREA_AVERAGING),0,0,null
@@ -262,19 +195,16 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
     var res = ""
     var resASP = ASP(imageSmoothed)
 
-    println("ASP ${resASP}")
     if (resASP.length in 1..2 && checkIsNum(resASP) || mayBeIs2DigitNum(resASP)){
         if (mayBeIs2DigitNum(resASP)) {
             res = resASP.substring(resASP.length - 2)
         } else {
             res = resASP
         }
-
     } else {
         withContext(Dispatchers.IO) {
             ImageIO.write(imageSmoothed, "PNG", file)
             var resTess = tess(file)
-            println("Tess ${resTess}")
             if (resTess.length in 1..2 && checkIsNum(resTess) || mayBeIs2DigitNum(resTess) || mayBeIs1DigitNum(resASP)) {
                 if (mayBeIs2DigitNum(resTess)) {
                     res = resTess.substring(resTess.length - 2)
@@ -286,7 +216,6 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
                 }
             } else {
                 res = SpaceOCR.sendImageFor1Number(file)
-                println("Space ${res}")
                 if (!(res.length in 1..2) || !checkIsNum(res)){
                     res = ""
                 }
@@ -304,18 +233,13 @@ fun onlyRed(image: BufferedImage){
     for(i in 0..<image.width){
         for(j in 0..<image.height){
             raster.getPixel(i,j,pixel)
-            if (pixel[0] - pixel[1] > threshold2 && pixel[0] - pixel[2] > threshold2) {
-////                pixel.forEach { print("$it ") }
-////                readln()
-            } else {
+            if (!(pixel[0] - pixel[1] > threshold2 && pixel[0] - pixel[2] > threshold2)) {
                 var argb = 0
                 argb += (255 as Int and 0xff) shl 24 // alpha value
                 argb += (255 as Int and 0xff) // blue value
                 argb += (255 as Int and 0xff) shl 8 // green value
                 argb += (255 as Int and 0xff) shl 16 // red value
-
                 image.setRGB(i,j,argb)
-
             }
         }
     }
@@ -384,57 +308,6 @@ fun getWorkArea(image: BufferedImage, currentCorner: Int, workArea:Int, parts: I
     return partOfImage
 }
 
-fun addTrainIfNeeded(trains: MutableList<Train>, image: BufferedImage, corners: MutableList<Point>, date: Calendar, hours: Int, minutes: Int, platform1y: Int, routesOld: String, routes: StringBuilder, coroutineScope: CoroutineScope, scrollState: ScrollState, recognisedRoutes: MutableList<String>): Int {
-    val stringRoutes = routes.split("\n")
-    val currentCorner = min(stringRoutes.size-1,corners.size-1);
-    if (currentCorner >= trains.size){
-        val train = Train()
-        setTrainTimeAndPlatformFromCorner(train, corners[currentCorner], image, date!!, hours, minutes, platform1y)
-        trains.add(train)
-        if (recognisedRoutes.size > currentCorner) {
-            routes.append(recognisedRoutes[currentCorner])
-        }
-        // train.route = if (recognisedRoutes.size > currentCorner && recognisedRoutes[currentCorner] != "") recognisedRoutes[currentCorner].toInt() else 0
-        if(routes.startsWith(routesOld)){
-            coroutineScope.launch {
-                scrollState.animateScrollTo(scrollState.maxValue + 100)
-            }
-        }
-    }
-    return currentCorner
-}
-
-fun addTrainIfNeeded2(trains: MutableList<Train>, image: BufferedImage, corners: MutableList<Point>, date: Calendar, hours: Int, minutes: Int): Int {
-//    val stringRoutes = routes.split("\n")
-    val currentCorner = min(trains.size+1,corners.size)-1;
-    if (currentCorner >= trains.size){
-        val train = Train()
-        setTrainTimeAndPlatformFromCorner(train, corners[currentCorner], image, date!!, hours, minutes, 0)
-        trains.add(train)
-//        if (recognisedRoutes.size > currentCorner) {
-//            routes.append(recognisedRoutes[currentCorner])
-//        }
-        // train.route = if (recognisedRoutes.size > currentCorner && recognisedRoutes[currentCorner] != "") recognisedRoutes[currentCorner].toInt() else 0
-//        if(routes.startsWith(routesOld)){
-//            coroutineScope.launch {
-//                scrollState.animateScrollTo(scrollState.maxValue + 100)
-//            }
-//        }
-    }
-    return currentCorner
-}
-
-
-fun updateRoutes(trains: MutableList<Train>, currentCorner: Int, routes: String) {
-    val stringRoutes: List<String> = routes.split("\n")
-    for(i in trains.indices){
-        if(i < stringRoutes.size){
-            if (checkIsNum(stringRoutes[i]) && stringRoutes[i] != "" && stringRoutes[i].length < 6)
-                trains[i].route = stringRoutes[i].toInt()
-        }
-    }
-}
-
 fun updateRoutes2(newTextFieldVal: TextFieldValue,
                   oldTextFieldVal: TextFieldValue,
                   trains: MutableList<Train>,
@@ -444,8 +317,6 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
                   hours: Int,
                   minutes: Int,
                   platform1y: Int,
-                  coroutineScope: CoroutineScope?,
-                  scrollState: ScrollState?,
                   recognisedRoutes: MutableList<String>
                   ): Int {
     val stringRoutes = newTextFieldVal.text.split("\n")
@@ -455,13 +326,9 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
         setTrainTimeAndPlatformFromCorner(train, corners[currentCorner], image, date!!, hours, minutes, platform1y)
         trains.add(train)
 
-
-        // train.route = if (recognisedRoutes.size > currentCorner && recognisedRoutes[currentCorner] != "") recognisedRoutes[currentCorner].toInt() else 0
         if(newTextFieldVal.text.startsWith(oldTextFieldVal.text)){
             train.route = if (recognisedRoutes.size > currentCorner && recognisedRoutes[currentCorner] != "") recognisedRoutes[currentCorner].toInt() else 0
-//            coroutineScope.launch {
-//                scrollState.animateScrollTo(scrollState.maxValue + 100)
-//            }
+
         }
     }
     for(i in trains.indices){

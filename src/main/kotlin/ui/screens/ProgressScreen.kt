@@ -78,15 +78,7 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
             }
         }
         Row{
-    /*
-    * Column{
-    *     Row{
-    *       TextField маршрут
-    *       TextField поезд
-    * }
-    * }
-    * для updateRoutes2 берем массив
-    * */
+
             TextField(
                 value = textFieldVal, onValueChange = {
                     var prevCursorPositionEnd = it.selection.end == it.text.length
