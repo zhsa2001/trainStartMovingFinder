@@ -4,10 +4,12 @@ import java.io.File
 import javax.swing.filechooser.FileFilter
 
 
+/**
+ * Фильтр для выбираемых png-файлов
+ */
 class PngFilter: FileFilter() {
     override fun accept(pathname: File?): Boolean {
         return pathname!!.extension == "png" ||
-//                pathname.extension == "tif" ||
                 pathname.isDirectory
     }
 

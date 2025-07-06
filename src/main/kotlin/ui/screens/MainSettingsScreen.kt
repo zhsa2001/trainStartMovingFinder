@@ -13,12 +13,18 @@ import ui.SelectFileButton
 import ui.utils.getImageSource
 import java.io.File
 import java.util.*
-
+/**
+ * Часть экрана с общими настройками для обеих частей графика: от Александровского сада и от Москвы-сити
+ * @param onFileSelected файл-изображение для обработки выбран
+ * @param onTimeStartSet время начала графика на изображении задано
+ * @param onTimeDiapasonInMinutesSet задана длительность временного периода графика в минутах
+ * @param directory если в функцию передается null,
+ */
 @Composable
 fun MainSettingsScreen(onFileSelected:(File?)->Unit,
                        onTimeStartSet:(Calendar)->Unit,
-                       onTimeDiapasoneInMinutesSet:(Int)->Unit,
-                       direcory:(File?)->File,
+                       onTimeDiapasonInMinutesSet:(Int)->Unit,
+                       directory:(File?)->File,
                        returnToStart:()->Unit,
                        goNext:() -> Unit){
 
@@ -33,10 +39,10 @@ fun MainSettingsScreen(onFileSelected:(File?)->Unit,
                 it?.let{
                     file = it;
                     onFileSelected(file);
-                    direcory(file!!.parentFile)
+                    directory(file!!.parentFile)
                 }
             },
-            { getImageSource(direcory(null)) })
+            { getImageSource(directory(null)) })
 
         Text("Время начала")
         MyTimePicker(5,30, { timeStart = it })
@@ -50,11 +56,11 @@ fun MainSettingsScreen(onFileSelected:(File?)->Unit,
 
         file?.let{
             Button(onClick =
-            {
-                onTimeStartSet(timeStart)
-                val minutesRange = timeEnd[Calendar.HOUR_OF_DAY]*60+timeEnd[Calendar.MINUTE] - (timeStart[Calendar.HOUR_OF_DAY]*60+timeStart[Calendar.MINUTE]) + if (nextDay) 24*60 else 0
-                onTimeDiapasoneInMinutesSet(minutesRange)
-                goNext() }){
+                {
+                    onTimeStartSet(timeStart)
+                    val minutesRange = timeEnd[Calendar.HOUR_OF_DAY]*60+timeEnd[Calendar.MINUTE] - (timeStart[Calendar.HOUR_OF_DAY]*60+timeStart[Calendar.MINUTE]) + if (nextDay) 24*60 else 0
+                    onTimeDiapasonInMinutesSet(minutesRange)
+                    goNext() }){
                 Text("Продолжить")
             }
         }

@@ -2,17 +2,31 @@ package train
 
 import java.util.*
 
+/**
+ * Хранит информацию о временных отрезках для определенного маршрута (за одни сутки)
+ * @property timeDiapasons список пар со временем начала и временем конца отрезка
+ * @property middleOfNight статическая константа для хранения времени полуночи 00:00:00
+ */
 class SecondLineDiapasones {
-    val timeDiapasones = mutableListOf<Pair<Date, Date>>()
-    val middleOfNight = Calendar.Builder().setTimeOfDay(0,0,0).build().time
+    val timeDiapasons = mutableListOf<Pair<Date, Date>>()
+        get
 
-    fun add(diapasone: Pair<Date, Date>){
-        if(diapasone.second < diapasone.first){
-            timeDiapasones.add(Pair(middleOfNight,diapasone.second))
-            timeDiapasones.add(Pair(diapasone.first,middleOfNight))
+    companion object{
+        val middleOfNight = Calendar.Builder().setTimeOfDay(0,0,0).build().time
+    }
+
+    /**
+     * Добавляет в список timeDiapasons новый временной отрезок и сортирует список
+     * @param diapason временной отрезок. Если внутри отрезка оказывается полуночь,
+     * добавляется 2 отрезка: до и после полуночи
+     */
+    fun add(diapason: Pair<Date, Date>){
+        if(diapason.second < diapason.first){
+            timeDiapasons.add(Pair(middleOfNight,diapason.second))
+            timeDiapasons.add(Pair(diapason.first,middleOfNight))
         } else {
-            timeDiapasones.add(diapasone)
+            timeDiapasons.add(diapason)
         }
-        timeDiapasones.sortBy { if (it.first != middleOfNight && it.second != middleOfNight) it.second else it.first }
+        timeDiapasons.sortBy { if (it.first != middleOfNight && it.second != middleOfNight) it.second else it.first }
     }
 }
