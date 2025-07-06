@@ -1,4 +1,4 @@
-package OCR.SpaceOCR
+package ocr.spaceocr
 
 import kotlinx.serialization.Serializable
 

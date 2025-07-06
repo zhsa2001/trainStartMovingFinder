@@ -1,9 +1,9 @@
-import ImageProcessing.findDownCorner
-import ImageProcessing.findHorizontalLine
-import ImageProcessing.findUpCorner
-import OCR.ASP
-import OCR.SpaceOCR.SpaceOCR
-import OCR.tess
+import imageprocessing.findDownCorner
+import imageprocessing.findHorizontalLine
+import imageprocessing.findUpCorner
+import ocr.ASP
+import ocr.spaceocr.SpaceOCR
+import ocr.tess
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

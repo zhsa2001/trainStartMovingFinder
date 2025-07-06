@@ -3,7 +3,7 @@ TrainStartMovingFinder предназначен для автоматизиро�
 Написан на языке Kotlin и фреймворке Compose Multiplatform For Desktop.
 
 1. Использование библиотек для распознавания:
-  - Aspose-OCR, 
+  - Aspose-ocr, 
   - Tesseract (tess4j), 
   - API интернет-ресурса OCRSpace.
 2. Входные данные:

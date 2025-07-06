@@ -1,4 +1,4 @@
-package OCR
+package ocr
 
 import net.sourceforge.tess4j.Tesseract
 import java.io.File

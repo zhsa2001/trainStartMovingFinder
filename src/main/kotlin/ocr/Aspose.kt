@@ -1,4 +1,4 @@
-package OCR
+package ocr
 
 import com.aspose.ocr.*
 import java.awt.image.BufferedImage

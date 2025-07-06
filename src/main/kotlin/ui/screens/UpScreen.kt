@@ -1,7 +1,7 @@
 package ui.screens
 
-import ImageProcessing.BinaryColorSchemeConverter
-import ImageProcessing.GrayColorSchemeConverter
+import imageprocessing.BinaryColorSchemeConverter
+import imageprocessing.GrayColorSchemeConverter
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue

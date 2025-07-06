@@ -1,4 +1,4 @@
-package ImageProcessing
+package imageprocessing
 
 import dist
 import java.awt.Point
@@ -159,13 +159,15 @@ fun findUpCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: Mut
     }
 }
 
-
+/**
+ * Находит
+ */
 fun findDownCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: MutableList<Point>){
     var find = false
     var lineBegin = Point()
     var lineEnd = Point()
-    val lh = mutableListOf<List<Point>>() // line horizontal
-    val lv = mutableListOf<List<Point>>() /// line vertical
+    val lh = mutableListOf<List<Point>>() // горизонталь
+    val lv = mutableListOf<List<Point>>() // вертикаль
     var i = y + boxSize - 1
     val data = image.raster
     val pixel = IntArray(4)
@@ -182,21 +184,12 @@ fun findDownCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: M
                     break
                 lineEnd = Point(j,i)
             }
-//            while (j < x + boxSize && pixel[0] == 0) {
-//                lineEnd = Point(j,i)
-//                data.getPixel(j,i,pixel)
-//                j++
-//            }
-//            lh.add(listOf(lineBegin, lineEnd))
             i--
             data.getPixel(x,i,pixel)
         }
         if (find){
             lh.add(listOf(lineBegin, lineEnd))
-//            println("$lineBegin $lineEnd ${lh.size}")
-//            readln()
             find = false
-//            break
         }
         i--
 
@@ -226,8 +219,6 @@ fun findDownCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: M
         }
         if (find){
             lv.add(listOf(lineBegin, lineEnd))
-//            println("$lineBegin $lineEnd")
-//            readln()
             find = false
         }
         j++

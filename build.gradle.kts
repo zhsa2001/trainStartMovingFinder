@@ -22,7 +22,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
-    implementation("com.aspose:aspose-ocr:24.8.0")
+//    implementation("com.aspose:aspose-ocr:24.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0-RC")
     implementation("net.sourceforge.tess4j:tess4j:5.13.0")
 }
