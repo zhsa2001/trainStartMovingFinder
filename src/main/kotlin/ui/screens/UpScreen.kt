@@ -14,7 +14,7 @@ import getHorisontalLines
 import getSubArea
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import train.Train
+import train.TrainInfo
 import updateRoutes2
 import java.awt.Point
 import java.awt.image.BufferedImage
@@ -24,6 +24,15 @@ import javax.imageio.ImageIO
 import kotlin.math.PI
 import kotlin.math.min
 
+/**
+ * Общая часть экранов при обработке верхней и нижней частей
+ * @param file цельный график-изображения
+ * @param date время начала графика
+ * @param minutes длительность графика в минутах
+ * @param goNext переход к следующему этапу
+ * @param returnToStart переход к началу
+ * @param returnMessage сообщение, выдаваемое при завершении обработки изображения
+ */
 @Composable
 fun UpPartProgressScreen(
     file: File,
@@ -35,7 +44,7 @@ fun UpPartProgressScreen(
 ) {
     var image by remember { mutableStateOf<BufferedImage?>(null) }
 
-    val trains by remember { mutableStateOf(mutableListOf<Train>()) }
+    val trains by remember { mutableStateOf(mutableListOf<TrainInfo>()) }
     var platform1y by remember { mutableStateOf(0) }
     var recognizedRoutes by remember { mutableStateOf(mutableListOf<String>()) }
 
@@ -126,14 +135,14 @@ fun UpPartProgressScreen(
                             )
                         }
                     }
-                } catch (_: Exception) {
-                    returnMessage("Произошла ошибка при обработке файла ${file.absolutePath}")
+                } catch (e: Exception) {
+                    returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e.message}")
                     goNext()
                 }
 
             }.start()
-        } catch (_: Exception) {
-            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath}")
+        } catch (e: Exception) {
+            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e.message}")
             goNext()
         }
 
@@ -171,8 +180,8 @@ fun UpPartProgressScreen(
                 drawCorner(image, corners[currentCorner]);
             },
             {
-                val file = File(file.parent + "/up_" + file.nameWithoutExtension + ".txt")
-                train.UtilSaver<Train>(file.absolutePath).save(trains)
+                val file = File(file.parent,"up_" + file.nameWithoutExtension + ".txt")
+                train.UtilSaver<TrainInfo>(file.absolutePath).save(trains)
                 returnMessage("Файл ${file.absolutePath} сохранен")
             },
             {

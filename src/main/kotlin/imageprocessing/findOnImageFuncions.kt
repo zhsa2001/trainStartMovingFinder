@@ -4,13 +4,21 @@ import dist
 import java.awt.Point
 import java.awt.image.BufferedImage
 import java.lang.Math.abs
-
+/**
+ * Находит горизонтальную линию.
+ * @param image изображение для поиска
+ * @param x левая верхняя координата x
+ * @param y левая верняя координата y
+ * @param boxWidth ширина области поиска
+ * @param boxHeight высота области поиска
+ *
+ * */
 fun findHorizontalLine(image: BufferedImage, x: Int, y: Int, boxWidth: Int, boxHeight: Int = 0): List<Point>{
     val boxHeight = if (boxHeight == 0) boxWidth else boxHeight
     var lineStart: Point? = null
     var lineEnd: Point? = null
     val raster = image.raster
-    var pixel = IntArray(4)
+    val pixel = IntArray(4)
     for(i in 0..<boxHeight){
         raster.getPixel(x,y+i,pixel)
         if(pixel[0] == 0){
@@ -33,16 +41,23 @@ fun findHorizontalLine(image: BufferedImage, x: Int, y: Int, boxWidth: Int, boxH
     val line = mutableListOf<Point>()
     if(lineEnd != null){
         line.add(lineStart!!)
-        line.add(lineEnd!!)
+        line.add(lineEnd)
     }
     return line
 }
 
+/**
+ * Находит вертикальную линию. Изображение должно быть бинарным (черно-белое)
+ * @param image изображение для поиска
+ * @param x левая верхняя координата x
+ * @param y левая верняя координата y
+ * @param square_size ширина квадрата поиска
+ * */
 fun findVerticalLine(image: BufferedImage,x: Int,y: Int,square_size: Int): List<Point>{
     var lineStart: Point? = null
     var lineEnd: Point? = null
     val raster = image.raster
-    var pixel = IntArray(4)
+    val pixel = IntArray(4)
     for(j in 0..<square_size){
         raster.getPixel(x+j,y,pixel)
         if(pixel[0] == 0){
@@ -65,11 +80,19 @@ fun findVerticalLine(image: BufferedImage,x: Int,y: Int,square_size: Int): List<
     val line = mutableListOf<Point>()
     if(lineEnd != null){
         line.add(lineStart!!)
-        line.add(lineEnd!!)
+        line.add(lineEnd)
     }
     return line
 }
 
+/**
+ * Находит верхний угол. Изображение должно быть бинарным (черно-белое)
+ * @param image изображение для поиска
+ * @param x левая верхняя координата x
+ * @param y левая верняя координата y
+ * @param boxSize ширина бокса
+ * @param corners список углов
+ * */
 fun findUpCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: MutableList<Point>){
     var find = false
     var lineBegin = Point()
@@ -160,8 +183,13 @@ fun findUpCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: Mut
 }
 
 /**
- * Находит
- */
+ * Находит верхний угол. Изображение должно быть бинарным (черно-белое)
+ * @param image изображение для поиска
+ * @param x левая верхняя координата x
+ * @param y левая верняя координата y
+ * @param boxSize ширина бокса
+ * @param corners список углов
+ * */
 fun findDownCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: MutableList<Point>){
     var find = false
     var lineBegin = Point()
@@ -225,8 +253,8 @@ fun findDownCorner(image: BufferedImage,x: Int, y: Int, boxSize: Int, corners: M
     }
     for (h in lh) {
         for (v in lv) {
-            if (abs(h[1].x - h[0].x) > (boxSize/2) && abs(v[1].y - v[0].y) > (boxSize/4)
-                        && abs(h[1].x - h[0].x) < (boxSize/10*9)) {
+            if (kotlin.math.abs(h[1].x - h[0].x) > (boxSize/2) && kotlin.math.abs(v[1].y - v[0].y) > (boxSize/4)
+                        && kotlin.math.abs(h[1].x - h[0].x) < (boxSize/10*9)) {
                 if (!corners.contains(h[1]))
                     corners.add(h[1])
                 return

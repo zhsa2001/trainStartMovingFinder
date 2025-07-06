@@ -9,7 +9,7 @@ import drawCorner
 import formListTrainsInSecondLine
 import getBoxes2
 import train.SecondLineRoutesCollection
-import train.Train
+import train.TrainInfo
 import train.UtilSaver
 import updateRoutes2
 import java.awt.Point
@@ -18,13 +18,23 @@ import java.io.File
 import java.util.*
 import javax.imageio.ImageIO
 
+/**
+ * Экран при обработке нижней части от Москвы-Сити
+ * @param file изображение с графиком
+ * @param date время начала графика
+ * @param minutes длительность графика в минутах
+ * @param goNext функция перехода к следующему этапу
+ * @param returnToStart функция возврата к начальному экрану
+ * @param returnMessage сообщение, выдаваемое при завершении обработки изображения
+ * @param trains информация о поездах из верхней части от Александровского сада. Может быть пустым списком
+ * */
 @Composable
-fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit, returnMessage: (String)-> Unit, trains: MutableList<train.Train>){
+fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: () -> Unit, returnToStart:()->Unit, returnMessage: (String)-> Unit, trains: MutableList<TrainInfo>){
     var image by remember { mutableStateOf<BufferedImage?>(null) }
     var corners by remember { mutableStateOf(mutableListOf<Point>()) }
     var currentCorner by remember { mutableStateOf(-1) }
 
-    val trains2 by remember { mutableStateOf(mutableListOf<train.Train>()) }
+    val trains2 by remember { mutableStateOf(mutableListOf<train.TrainInfo>()) }
     var recognisedRoutes by remember { mutableStateOf(mutableListOf<Int>()) }
     var offsetForRecognisedRoutes by remember { mutableStateOf(0) }
 
@@ -74,8 +84,8 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
             if(!isStopped) {
                 secondLineRoutesCollection = formListTrainsInSecondLine(trains, recognisedRoutes)
             }
-        } catch(_:Exception){
-            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath}")
+        } catch(e:Exception){
+            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e.message}")
             goNext()
         }
     }
@@ -121,8 +131,8 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
                 drawCorner(image, corners[currentCorner]);
             },
             {
-                val fileTrainStart = File(file.parent + "/down_" + file.nameWithoutExtension + ".txt")
-                UtilSaver<Train>(fileTrainStart.absolutePath).save(trains2)
+                val fileTrainStart = File(file.parent, "down_" + file.nameWithoutExtension + ".txt")
+                UtilSaver<TrainInfo>(fileTrainStart.absolutePath).save(trains2)
                 var fileTrainIntervals = File(file.parent + "/intervals_" + file.nameWithoutExtension + ".txt")
                 UtilSaver<SecondLineRoutesCollection>(fileTrainIntervals.absolutePath).save(
                     listOf(

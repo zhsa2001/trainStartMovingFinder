@@ -8,6 +8,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
+/**
+ * Экран с результатами
+ * @param message сообщение с результатами
+ * @param returnToStart возврат к началу
+ */
 @Composable
 fun ResultScreen(message: String, returnToStart:()->Unit){
     Column {

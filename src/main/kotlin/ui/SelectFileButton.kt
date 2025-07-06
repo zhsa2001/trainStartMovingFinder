@@ -9,6 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import java.io.File
 
+/**
+ * Элемент для выбора файла
+ * @param text текст кнопки
+ * @param onFileSelected функция, вызываемая при выборе файла
+ * @param getFileSource функция для вызова окна с файлами
+ */
 @Composable
 fun SelectFileButton(text: String, onFileSelected: (File?)->Unit, getFileSource:()->File?){
     var file by remember { mutableStateOf<File?>(null) }

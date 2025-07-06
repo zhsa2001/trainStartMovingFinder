@@ -4,6 +4,11 @@ import com.aspose.ocr.*
 import java.awt.image.BufferedImage
 import java.util.ArrayList
 
+/**
+ * Выполняет распознавание символов с помощью AsposeOCR
+ * @param image распознаваемое изображения
+ * @return первую строку с распознанным текстом
+ */
 fun ASP(image: BufferedImage): String{
     var res = ""
     try {

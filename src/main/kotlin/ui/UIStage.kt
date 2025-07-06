@@ -13,5 +13,20 @@ enum class UIStage {
      * Настройка параметров перед обработкой верхней половины графика, от Александровского сада
      */
     SETTINGS_PROCESSING_UP,
-    ROUTE_PROCESSING_UP, SETTINGS_PROCESSING_DOWN, ROUTE_PROCESSING_DOWN, DONE
+    /**
+     * Этап с обработкой верхней половины графика, от Александровского сада
+     */
+    ROUTE_PROCESSING_UP,
+    /**
+     * Настройка параметров перед обработкой нижней половины графика, от Москвы-Сити
+     */
+    SETTINGS_PROCESSING_DOWN,
+    /**
+     * Этап с обработкой нижней половины графика, от Москвы-Сити
+     */
+    ROUTE_PROCESSING_DOWN,
+    /**
+     * Обработка завершена
+     */
+    DONE
 }

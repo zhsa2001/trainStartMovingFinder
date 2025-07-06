@@ -1,7 +1,8 @@
 package ui.screens
 
 import androidx.compose.foundation.*
-import train.Train
+import androidx.compose.foundation.layout.Arrangement
+import train.TrainInfo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,8 +30,21 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * Общая часть экранов при обработке верхней и нижней частей
+ * @param image цельный график-изображения
+ * @param trains список уходов поездов с конечной станции (нижней или верхней)
+ * @param corners список точек-уходов поездов на изображении с координатами
+ * @param currentCorner текущий обрабатываемый уход
+ * @param textFieldVal значение в текстовом поле для непосредственной обработки пользователем
+ * @param goNext переход к следующему этапу
+ * @param returnToStart переход к началу
+ * @param onRouteTextFieldUpdate функция, вызываемая при обновлении значений в текстовом поле с вводимыми маршрутами
+ * @param save функция сохранения
+ * @param onStopRequest запрос на отмену обработки
+ */
 @Composable
-fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
+fun ProgressScreen(image: BufferedImage, trains: MutableList<TrainInfo>,
                    corners: MutableList<Point>, currentCorner:  ()->Int,
                    textFieldVal: TextFieldValue,
                    goNext: () -> Unit,
@@ -54,29 +68,32 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<Train>,
     val focusRequester = remember { FocusRequester() }
 
     Column{
-        Button(onClick = {
-            onStopRequest()
-        }){
-            Text("Отменить")
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            Button(onClick = {
+                onStopRequest()
+            }){
+                Text("Отменить")
+            }
+            Row {
+                Button(onClick = {
+                    workArea = max(workArea - 1,0)
+                    focusRequester.requestFocus()
+
+                }){
+                    Text("<<")
+                }
+                Button(onClick = {
+                    workArea = min(workArea + 1,parts-1)
+                    focusRequester.requestFocus()
+                }){
+                    Text(">>")
+                }
+            }
         }
         resizeImage(imageScaled, scale, image)
         Image(getWorkArea(imageScaled,currentCorner(),workArea,parts,padding).toComposeImageBitmap(),"Область графика с началом движения")
 
-        Row {
-            Button(onClick = {
-                workArea = max(workArea - 1,0)
-                focusRequester.requestFocus()
 
-            }){
-                Text("<<")
-            }
-            Button(onClick = {
-                workArea = min(workArea + 1,parts-1)
-                focusRequester.requestFocus()
-            }){
-                Text(">>")
-            }
-        }
         Row{
 
             TextField(

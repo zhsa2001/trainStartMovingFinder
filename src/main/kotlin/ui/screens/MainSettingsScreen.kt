@@ -18,7 +18,9 @@ import java.util.*
  * @param onFileSelected файл-изображение для обработки выбран
  * @param onTimeStartSet время начала графика на изображении задано
  * @param onTimeDiapasonInMinutesSet задана длительность временного периода графика в минутах
- * @param directory если в функцию передается null,
+ * @param directory возвращает директирию для открытия, если в функцию передается null, иначе устанавливает директорию для ее сохранения
+ * @param goNext функция перехода к следующему этапу
+ * @param returnToStart функция возврата к начальному экрану
  */
 @Composable
 fun MainSettingsScreen(onFileSelected:(File?)->Unit,

@@ -9,7 +9,7 @@ import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import train.Train
+import train.TrainInfo
 import ui.UIStage
 import ui.screens.*
 import java.io.File
@@ -19,7 +19,9 @@ import java.util.*
 val folderSubimages = "subimages"
 val asposeFolder = "aspose_data"
 
-
+/**
+ * Приложение со всеми экранами
+ */
 @Composable
 @Preview
 fun App() {
@@ -28,7 +30,7 @@ fun App() {
     var date by remember { mutableStateOf<Calendar>(Calendar.getInstance()) }
     var message by remember { mutableStateOf("") }
     var countOfMinutes by remember { mutableStateOf(0) }
-    var trains by remember { mutableStateOf(mutableListOf<Train>()) }
+    var trains by remember { mutableStateOf(mutableListOf<TrainInfo>()) }
 
 
     var previousPath by remember { mutableStateOf(File("")) }
@@ -100,6 +102,9 @@ fun App() {
     }
 }
 
+/**
+ * Точка входа в приложение
+ */
 fun main() = application {
     val AppIcon = painterResource("icon.png")
     Window(onCloseRequest = ::exitApplication, icon = AppIcon, title = "Обнаружение точек старта движения для табло") {

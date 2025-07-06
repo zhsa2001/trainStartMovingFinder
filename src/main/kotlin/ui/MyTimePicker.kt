@@ -12,6 +12,12 @@ import checkIsNum
 import java.util.*
 import kotlin.math.min
 
+/**
+ * Элемент для выбора времени
+ * @param hour начальный час
+ * @param minute начальная минута
+ * @param setTime функция для обновления времени на новое
+ */
 @Composable
 fun MyTimePicker(hour: Int, minute: Int, setTime: (Calendar)->Unit) {
     val widthClockTextFields = 100.dp

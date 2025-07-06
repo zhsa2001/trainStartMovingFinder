@@ -8,7 +8,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import train.SecondLineRoutesCollection
-import train.Train
+import train.TrainInfo
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Image
@@ -21,9 +21,9 @@ import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.math.min
 
-fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<Int> = mutableListOf<Int>()): SecondLineRoutesCollection {
-    var secondLineStart = HashMap<Int, Train>()
-    var secondLineEnd = HashMap<Int, Train>()
+fun formListTrainsInSecondLine(trains: List<TrainInfo>, listOfRoutes: MutableList<Int> = mutableListOf<Int>()): SecondLineRoutesCollection {
+    var secondLineStart = HashMap<Int, TrainInfo>()
+    var secondLineEnd = HashMap<Int, TrainInfo>()
     var secondLine = SecondLineRoutesCollection()
     for (i in trains.indices){
         if (trains[i].platform == 1){
@@ -32,7 +32,7 @@ fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<In
             }
             secondLineEnd[trains[i].route] = trains[i]
             if(trains[i].isGoingToDepo){
-                secondLine.addDiapasone(
+                secondLine.addDiapason(
                     trains[i].route,
                     Pair(secondLineStart.remove(trains[i].route)!!.time,
                         secondLineEnd.remove(trains[i].route)!!.time))
@@ -41,7 +41,7 @@ fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<In
             }
         } else {
             if(secondLineStart.containsKey(trains[i].route)){
-                secondLine.addDiapasone(
+                secondLine.addDiapason(
                     trains[i].route,
                     Pair(secondLineStart.remove(trains[i].route)!!.time,
                         trains[i].time))
@@ -52,7 +52,7 @@ fun formListTrainsInSecondLine(trains: List<Train>, listOfRoutes: MutableList<In
     }
     var routesRemains = secondLineStart.values.toMutableList()
     for(i in 0..<routesRemains.size){
-        secondLine.addDiapasone(
+        secondLine.addDiapason(
             routesRemains[i].route,
             Pair(
                 secondLineStart.remove(routesRemains[i].route)!!.time,
@@ -151,7 +151,7 @@ fun deleteNotStartTrainPoints2( corners: MutableList<Point>,yUp: Int){
     }
 }
 
-fun setTrainTimeAndPlatformFromCorner(train: Train, corner: Point, image: BufferedImage, startDate: Calendar, hours: Int, minutes: Int, platform1y: Int){
+fun setTrainTimeAndPlatformFromCorner(train: TrainInfo, corner: Point, image: BufferedImage, startDate: Calendar, hours: Int, minutes: Int, platform1y: Int){
     val minutes = hours*60 + minutes
     val seconds = minutes*60
 
@@ -188,7 +188,7 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
         imageForRotate.getScaledInstance((width).toInt(),(height).toInt(),Image.SCALE_AREA_AVERAGING),0,0,null
     )
 
-    val file = File("$folderSubimages\\draw_${corner.x}.png")
+    val file = File("$folderSubimages","draw_${corner.x}.png")
     onlyRed(imageSmoothed)
 
 
@@ -310,7 +310,7 @@ fun getWorkArea(image: BufferedImage, currentCorner: Int, workArea:Int, parts: I
 
 fun updateRoutes2(newTextFieldVal: TextFieldValue,
                   oldTextFieldVal: TextFieldValue,
-                  trains: MutableList<Train>,
+                  trains: MutableList<TrainInfo>,
                   image: BufferedImage,
                   corners: MutableList<Point>,
                   date: Calendar,
@@ -322,7 +322,7 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
     val stringRoutes = newTextFieldVal.text.split("\n")
     val currentCorner = min(stringRoutes.size-1,corners.size-1);
     if (currentCorner >= trains.size){
-        val train = Train()
+        val train = TrainInfo()
         setTrainTimeAndPlatformFromCorner(train, corners[currentCorner], image, date!!, hours, minutes, platform1y)
         trains.add(train)
 
@@ -340,15 +340,15 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
     return currentCorner
 }
 
-fun getTrainsFromFile(file: File, tab: String = "\t"): MutableList<Train> {
-    val trains = mutableListOf<Train>()
+fun getTrainsFromFile(file: File, tab: String = "\t"): MutableList<TrainInfo> {
+    val trains = mutableListOf<TrainInfo>()
     try{
         val trainLines = Files.readAllLines(file.toPath())
 
         for(line in trainLines){
             val data = line.split(tab)
-            val train = Train()
-            train.time = train.dateTimeFormat.parse(data[0])
+            val train = TrainInfo()
+            train.time = TrainInfo.dateTimeFormat.parse(data[0])
             train.platform = data[1].toInt()
             train.route = data[2].toInt()
             train.isGoingToDepo = data[3].toInt() == 1

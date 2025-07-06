@@ -26,8 +26,8 @@ class SecondLineRoutesCollection: SavebleInfo {
         val s = StringBuilder()
         for(route in routes.keys){
             routes[route]!!.timeDiapasons.forEach { s.append(
-                "$route: ${TrainInfo().dateTimeFormat.format(it.first)}${tab}" +
-                        "${TrainInfo().dateTimeFormat.format(it.second)}\n"
+                "$route: ${TrainInfo.dateTimeFormat.format(it.first)}${tab}" +
+                        "${TrainInfo.dateTimeFormat.format(it.second)}\n"
             ) }
         }
         return s.toString()
