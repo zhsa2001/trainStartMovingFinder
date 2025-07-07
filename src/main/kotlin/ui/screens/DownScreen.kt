@@ -92,7 +92,7 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
                 secondLineRoutesCollection = formListTrainsInSecondLine(trains, recognisedRoutes)
             }
         } catch(e:Exception){
-            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e.message}")
+            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e}")
             goNext()
         }
     }

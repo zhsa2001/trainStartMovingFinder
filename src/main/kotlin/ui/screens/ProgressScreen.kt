@@ -1,12 +1,8 @@
 package ui.screens
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.*
 import train.TrainInfo
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -68,7 +64,7 @@ fun ProgressScreen(image: BufferedImage, trains: MutableList<TrainInfo>,
     val focusRequester = remember { FocusRequester() }
 
     Column{
-        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Button(onClick = {
                 onStopRequest()
             }){

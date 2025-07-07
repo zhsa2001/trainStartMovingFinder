@@ -115,11 +115,8 @@ fun UpPartProgressScreen(
                                                 corners[i].x + height, y
                                         )
                                     ))
-
                                 }
                             }
-
-
                         }
                         job.join()
                         if (!isStopped) {
@@ -136,13 +133,13 @@ fun UpPartProgressScreen(
                         }
                     }
                 } catch (e: Exception) {
-                    returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e.message}")
+                    returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e}")
                     goNext()
                 }
 
             }.start()
         } catch (e: Exception) {
-            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e.message}")
+            returnMessage("Произошла ошибка при обработке файла ${file.absolutePath} ${e}")
             goNext()
         }
 
