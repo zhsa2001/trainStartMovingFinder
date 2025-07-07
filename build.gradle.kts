@@ -42,6 +42,7 @@ compose.desktop {
             windows {
                 iconFile.set(iconsRoot.resolve("icon.ico"))
                 menuGroup = "Compose Examples"
+                upgradeUuid = "0627340e-42c3-4aad-869d-82938de7fae1"
             }
             linux {
                 iconFile.set(iconsRoot.resolve("icon.png"))
