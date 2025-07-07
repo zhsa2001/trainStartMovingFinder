@@ -21,6 +21,13 @@ import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.math.min
 
+/**
+ * Формирует список диапазонов присутствия маршрутов на нижней половине от Москвы-Сити, а также изменяет listOfRoutes,
+ * добавляя маршруты, приходящие на нижнюю половину с Александровского сада
+ * @param trains список информации об уходах маршрутов с верхней половины от Александровского сада
+ * @param listOfRoutes заполняемый список с маршрутами, уходящими с Александровского сада на Москву-Сити
+ * @return список диапазонов присутствия маршрутов
+ */
 fun formListTrainsInSecondLine(trains: List<TrainInfo>, listOfRoutes: MutableList<Int> = mutableListOf<Int>()): SecondLineRoutesCollection {
     var secondLineStart = HashMap<Int, TrainInfo>()
     var secondLineEnd = HashMap<Int, TrainInfo>()
@@ -63,6 +70,10 @@ fun formListTrainsInSecondLine(trains: List<TrainInfo>, listOfRoutes: MutableLis
     return secondLine
 }
 
+/**
+ * Очищает директорию. Если директория не существует, то создает ее
+ * @param folderSubimages директория
+ */
 fun clearFolder(folderSubimages: String) {
     val dir = File(folderSubimages)
     if (!dir.exists()){
@@ -76,6 +87,9 @@ fun clearFolder(folderSubimages: String) {
     }
 }
 
+/**
+ * Проверяет, является ли строка числом
+ */
 fun checkIsNum(num: String):Boolean{
     var res = true
     for(c in num){
@@ -87,10 +101,23 @@ fun checkIsNum(num: String):Boolean{
     return res
 }
 
+/**
+ * Вычисляет расстояние между точками
+ * @param p1 координаты одной из точек
+ * @param p2 координаты второй из точек
+ * @return расстояние
+ */
 fun dist(p1: Point, p2: Point): Double =
     //sqrt((p1.x - p2.x).toDouble().pow(2) + (p1.y - p2.y).toDouble().pow(2))
     (Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y)).toDouble()
 
+/**
+ * Находит в области изображения список всех горизонталей, начинающихся с левой стороны области
+ * @param grayImage изображение
+ * @param boxWidth ширина области
+ * @param boxHeight длина области
+ * @return список точек, в которых начинаются горизонтали
+ */
 fun getHorisontalLines(grayImage: BufferedImage, boxWidth: Int = 500, boxHeight: Int = 30): MutableList<Point> {
     val horisontalLines = mutableListOf<Point>()
     var i = 4
@@ -105,6 +132,12 @@ fun getHorisontalLines(grayImage: BufferedImage, boxWidth: Int = 500, boxHeight:
     return horisontalLines
 }
 
+/**
+ * Находит углы уходов поездов на изображении с отправлением от Александровского сада
+ * @param grayImage изображение
+ * @param boxSize сторона квадратной области
+ * @return список точек-уходов
+ */
 fun getBoxes(grayImage: BufferedImage, boxSize: Int = 30): MutableList<Point> {
     val corners = mutableListOf<Point>()
     val lines = getHorisontalLines(grayImage)
@@ -117,6 +150,12 @@ fun getBoxes(grayImage: BufferedImage, boxSize: Int = 30): MutableList<Point> {
     return corners
 }
 
+/**
+ * Находит углы уходов поездов на изображении с отправлением от Москвы-Сити
+ * @param grayImage изображение
+ * @param boxSize сторона квадратной области
+ * @return список точек-уходов
+ */
 fun getBoxes2(grayImage: BufferedImage, boxSize: Int = 30): MutableList<Point> {
     val corners = mutableListOf<Point>()
     val lines = getHorisontalLines(grayImage)
@@ -129,7 +168,13 @@ fun getBoxes2(grayImage: BufferedImage, boxSize: Int = 30): MutableList<Point> {
     return corners
 }
 
-fun deleteNotStartTrainPoints( corners: MutableList<Point>,yUp: Int, yBottom: Int){
+/**
+ * Удаляет из списка точек ухода выбросы для отправления с Александровского сада
+ * @param corners список точек-уходов
+ * @param yUp верхняя граница точек
+ * @param yBottom нижняя граница точек
+ */
+fun deleteNotStartTrainPoints(corners: MutableList<Point>,yUp: Int, yBottom: Int){
     var i = 0
     while(i < corners.size) {
         while(i < corners.size &&
@@ -140,6 +185,12 @@ fun deleteNotStartTrainPoints( corners: MutableList<Point>,yUp: Int, yBottom: In
     }
 }
 
+/**
+ * Удаляет из списка точек ухода выбросы для отправления с Москвы-Сити
+ * @param corners список точек-уходов
+ * @param yUp верхняя граница точек
+ * @param yBottom нижняя граница точек
+ */
 fun deleteNotStartTrainPoints2( corners: MutableList<Point>,yUp: Int){
     var i = 0
     while(i < corners.size) {
@@ -151,6 +202,16 @@ fun deleteNotStartTrainPoints2( corners: MutableList<Point>,yUp: Int){
     }
 }
 
+/**
+ * Вычисляет время и номер платформы для заданной точки
+ * @param train информация о поезде для заполнения времени и платформы
+ * @param corner точка-угол с отправлением поезда
+ * @param image изображение-график
+ * @param startDate время начала графика
+ * @param hours длительность в часай
+ * @param minutes длительность в минутах
+ * @param platform1y координата y первой платформы
+ */
 fun setTrainTimeAndPlatformFromCorner(train: TrainInfo, corner: Point, image: BufferedImage, startDate: Calendar, hours: Int, minutes: Int, platform1y: Int){
     val minutes = hours*60 + minutes
     val seconds = minutes*60
@@ -167,6 +228,15 @@ fun setTrainTimeAndPlatformFromCorner(train: TrainInfo, corner: Point, image: Bu
     train.platform = if (Math.abs(corner.y - platform1y) < 4) 1 else 2
 }
 
+/**
+ * Распознает в подобласти у точки угла-ухода со станции номер маршрута.
+ * Работает для верхней части, с отправлением от Александровского сада
+ * @param image график
+ * @param corner текущий угол-уход со станции
+ * @param angle угол поворота линии, над которой должен находиться номер маршрута
+ * @param nextCorner следующая точка-уход со станции
+ * @return строку с распознанным маршрутом
+ */
 suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextCorner: Point): String {
     var height = nextCorner.x - corner.x
     var width = 100
@@ -205,10 +275,10 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
         withContext(Dispatchers.IO) {
             ImageIO.write(imageSmoothed, "PNG", file)
             var resTess = tess(file)
-            if (resTess.length in 1..2 && checkIsNum(resTess) || mayBeIs2DigitNum(resTess) || mayBeIs1DigitNum(resASP)) {
+            if (resTess.length in 1..2 && checkIsNum(resTess) || mayBeIs2DigitNum(resTess) || mayBeIsDigitNum(resASP)) {
                 if (mayBeIs2DigitNum(resTess)) {
                     res = resTess.substring(resTess.length - 2)
-                } else if (mayBeIs1DigitNum(resASP)) {
+                } else if (mayBeIsDigitNum(resASP)) {
                     val num = get1DigitNum(resASP)
                     res = if (num == 0) "" else num.toString()
                 } else {
@@ -226,6 +296,10 @@ suspend fun getSubArea(image: BufferedImage, corner: Point, angle: Double, nextC
 
 }
 
+/**
+ * Преобразует изображение в черно-белое, черным выделяются красные пиксели
+ * @param image изменяемое изображение
+ */
 fun onlyRed(image: BufferedImage){
     val raster = image.data
     var pixel = IntArray(4)
@@ -245,14 +319,23 @@ fun onlyRed(image: BufferedImage){
     }
 }
 
-
+/**
+ * Проверяет, содержит ли строка двузначное число. Число должно быть в конце строки, а остальные символы должны быть не цифрами
+ * @param s строка
+ * @return true, если строка может содержать 2-значное число
+ */
 fun mayBeIs2DigitNum(s: String): Boolean {
     return s.length > 2 &&
             checkIsNum(s.substring(s.length - 2)) &&
             notContainsNumber(s.substring(0,s.length - 2))
 }
 
-fun mayBeIs1DigitNum(s: String): Boolean {
+/**
+ * Проверяет, содержит ли строка число. Делит по пробелу, если одно из них число, то возвращает true
+ * @param s строка
+ * @return true, если строка может содержать число
+ */
+fun mayBeIsDigitNum(s: String): Boolean {
     var isContainsNum = false
     for (el in s.split(" ","\n")){
         if (el.isNotEmpty() && checkIsNum(el)){
@@ -263,6 +346,11 @@ fun mayBeIs1DigitNum(s: String): Boolean {
     return isContainsNum
 }
 
+/**
+ * Выбирает число из строки. Делит по пробелу и рассматривает каждую подстроку как число
+ * @param s строка
+ * @return найденное число
+ */
 fun get1DigitNum(s: String): Int {
     var num = 0
     for (el in s.split(" ","\n")){
@@ -274,6 +362,11 @@ fun get1DigitNum(s: String): Int {
     return num
 }
 
+/**
+ * Проверяет, что строка не содержит цифр
+ * @param s проверяемая строка
+ * @return true, если строка не содержит ни одной цифры
+ */
 fun notContainsNumber(s: String): Boolean {
     var flag = true
     for(ch in s){
@@ -285,7 +378,12 @@ fun notContainsNumber(s: String): Boolean {
     return flag
 }
 
-
+/**
+ * Выделяет квадратом заданного размера область вокруг точки-угла с отправлением поезда со станции
+ * @param image изображение, на котором рисуется область
+ * @param corner точка ухода для выделения
+ * @param boxSize размер области
+ */
 fun drawCorner(image: BufferedImage, corner: Point, boxSize: Int = 30){
     val drawImage = image.createGraphics()
     drawImage.color = Color.ORANGE
@@ -294,12 +392,26 @@ fun drawCorner(image: BufferedImage, corner: Point, boxSize: Int = 30){
     drawImage.drawRect(corner.x-boxSize/2,corner.y-boxSize/2,boxSize,boxSize)
 }
 
+/**
+ * Масштабирует изображение
+ * @param imageScaled изображение для результирующего изображения
+ * @param scale vfcinf,
+ * @param image исходное изображение
+ */
 fun resizeImage(imageScaled: BufferedImage,scale: Double,image: BufferedImage){
     val graphics = imageScaled.createGraphics()
     graphics.scale(scale,scale)
     graphics.drawImage(image,0,0,null)
 }
 
+/**
+ * Получает часть изображения для показа текущего фрагмента пользователю
+ * @param image исходное изображение
+ * @param currentCorner -текущий угол
+ * @param workArea номер текущей показываемой области
+ * @param parts число всех областей
+ * @param padding отступ, включаемый в рабочую область
+ */
 fun getWorkArea(image: BufferedImage, currentCorner: Int, workArea:Int, parts: Int, padding: Int): BufferedImage {
     val partOfImage = image.getSubimage(image.width / parts * workArea, 0,
         min(image.width / parts + padding,
@@ -308,6 +420,20 @@ fun getWorkArea(image: BufferedImage, currentCorner: Int, workArea:Int, parts: I
     return partOfImage
 }
 
+/**
+ * Обновляет список с информацией об уходящиих поездах в соответствии с новым значением из поля ввода
+ * @param newTextFieldVal новое значение
+ * @param oldTextFieldVal старое значение
+ * @param trains заполняемая информация
+ * @param image изображение-график
+ * @param corners список точек ухода поездов
+ * @param date время начала графика
+ * @param hours длительность графика в часах
+ * @param minutes длительность графика в минутах
+ * @param platform1y координата y первой платформы
+ * @param recognisedRoutes список определенных автоматически маршрутов
+ * @return номер текущего угла после обновления инфомрации
+ */
 fun updateRoutes2(newTextFieldVal: TextFieldValue,
                   oldTextFieldVal: TextFieldValue,
                   trains: MutableList<TrainInfo>,
@@ -340,6 +466,12 @@ fun updateRoutes2(newTextFieldVal: TextFieldValue,
     return currentCorner
 }
 
+/**
+ * Считывает информацию о поездах, уходящих с Александровского сада
+ * @param file файл с информацией
+ * @param tab символ разделения времени, номера маршрута и пр. в строке
+ * @return список с прочитанной информацией
+ */
 fun getTrainsFromFile(file: File, tab: String = "\t"): MutableList<TrainInfo> {
     val trains = mutableListOf<TrainInfo>()
     try{
