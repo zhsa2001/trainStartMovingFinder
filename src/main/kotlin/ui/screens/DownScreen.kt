@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.util.*
 import javax.imageio.ImageIO
+import kotlin.math.min
 
 /**
  * Экран при обработке нижней части от Москвы-Сити
@@ -63,6 +64,12 @@ fun DownPartProgressScreen(file: File, date: Calendar?, minutes: Int, goNext: ()
             }
             if(!isStopped) {
                 corners.sortBy {it.x}
+            }
+
+            for(i in 0..<min(corners.size,45)){
+                if(platform1y < corners[i].y){
+                    platform1y = corners[i].y
+                }
             }
 
             if(!isStopped) {
